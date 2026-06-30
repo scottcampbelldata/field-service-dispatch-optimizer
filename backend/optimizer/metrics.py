@@ -124,3 +124,59 @@ def compare(baseline: dict, optimized: dict) -> dict:
         "unassigned_delta": optimized["unassigned"] - baseline["unassigned"],
         "objective_delta": optimized["objective"] - baseline["objective"],
     }
+
+
+def plan_diagnostics(instance: Instance, plan: Plan) -> dict:
+    """Constraint-level explanation of a plan: why jobs went unassigned, and how
+    demand stacks up against capacity per skill. Powers the Constraint Explorer
+    and Executive Summary."""
+    assigned = plan.assigned()
+    unassigned = plan.unassigned()
+
+    # Unassigned counts by reason code.
+    reason_counts: dict[str, int] = defaultdict(int)
+    for a in unassigned:
+        reason_counts[a.reason] += 1
+
+    # Per-skill demand vs capacity.
+    skill_demand = []
+    for skill in instance.skills:
+        jobs = [j for j in instance.jobs if j.required_skill == skill.id]
+        if not jobs:
+            continue
+        done = sum(1 for a in assigned if instance.job(a.job_id).required_skill == skill.id)
+        un = sum(1 for a in unassigned if instance.job(a.job_id).required_skill == skill.id)
+        breaches = sum(
+            1 for a in assigned
+            if a.is_sla_breach and instance.job(a.job_id).required_skill == skill.id
+        )
+        skill_demand.append({
+            "skill": skill.name,
+            "certified_techs": len(instance.certified_techs(skill.id)),
+            "jobs": len(jobs),
+            "completed": done,
+            "unassigned": un,
+            "breaches": breaches,
+            "demand_minutes": sum(j.duration for j in jobs),
+        })
+
+    parts_blocked = sum(1 for j in instance.jobs if j.part_blocked)
+    emergency_count = sum(1 for j in instance.jobs if j.is_emergency)
+
+    pain = {s["skill"]: s["unassigned"] + s["breaches"] for s in skill_demand}
+    bottleneck = max(pain, key=pain.get) if pain and max(pain.values()) > 0 else None
+
+    return {
+        "unassigned_by_reason": [
+            {"reason": r, "count": c}
+            for r, c in sorted(reason_counts.items(), key=lambda kv: -kv[1])
+        ],
+        "skill_demand": sorted(skill_demand, key=lambda s: -(s["unassigned"] + s["breaches"])),
+        "parts_blocked": parts_blocked,
+        "emergency_count": emergency_count,
+        "bottleneck_skill": bottleneck,
+        "total_capacity_minutes": sum(
+            t.shift_end - t.shift_start for t in instance.technicians
+        ),
+        "total_demand_minutes": sum(j.duration for j in instance.jobs),
+    }
