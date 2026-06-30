@@ -34,6 +34,10 @@ def _tech_counts(min_techs: int, max_techs: int, steps: int) -> list[int]:
 def marginal_value(series: list[dict]) -> tuple[list[dict], int | None]:
     """Per-added-technician deltas for one series (sorted by technician_count).
 
+    Reports jobs gained and overtime-hours saved by each added technician.
+    (Raw SLA-breach count is intentionally not used here: it is conditional on
+    completion — finishing more jobs can raise the absolute breach count even as
+    service improves — so it is a misleading marginal metric.)
     Returns (marginal_rows, diminishing_at) where diminishing_at is the first
     technician count whose marginal job gain drops below 1.
     """
@@ -42,11 +46,11 @@ def marginal_value(series: list[dict]) -> tuple[list[dict], int | None]:
     diminishing_at: int | None = None
     for prev, cur in zip(rows, rows[1:]):
         dj = cur["jobs_completed"] - prev["jobs_completed"]
-        db = cur["sla_breaches"] - prev["sla_breaches"]
+        d_ot = round(cur["overtime_hours"] - prev["overtime_hours"], 1)
         marginal.append({
             "technician_count": cur["technician_count"],
             "delta_jobs": dj,
-            "delta_breaches": db,
+            "delta_overtime": d_ot,
         })
         if diminishing_at is None and dj < 1:
             diminishing_at = cur["technician_count"]
@@ -70,10 +74,20 @@ def _narrative(on_series: list[dict], off_series: list[dict], diminishing_at: in
         return "No capacity points were computed."
     on = sorted(on_series, key=lambda p: p["technician_count"])
     lo, hi = on[0], on[-1]
+
+    # Overtime change across the range, worded by actual direction.
+    d_ot = round(hi["overtime_hours"] - lo["overtime_hours"], 1)
+    if d_ot < 0:
+        ot_phrase = f"and trims overtime from {lo['overtime_hours']} to {hi['overtime_hours']} hours"
+    elif d_ot > 0:
+        ot_phrase = f"while overtime rises from {lo['overtime_hours']} to {hi['overtime_hours']} hours"
+    else:
+        ot_phrase = f"with overtime steady around {hi['overtime_hours']} hours"
+
     parts = [
         f"Scaling the crew from {lo['technician_count']} to {hi['technician_count']} "
         f"technicians lifts completed jobs from {lo['jobs_completed']} to {hi['jobs_completed']} "
-        f"and cuts SLA breaches from {lo['sla_breaches']} to {hi['sla_breaches']}."
+        f"{ot_phrase}."
     ]
     if diminishing_at is not None:
         parts.append(
@@ -87,11 +101,16 @@ def _narrative(on_series: list[dict], off_series: list[dict], diminishing_at: in
         top = hi["technician_count"]
         if top in off:
             dj = hi["jobs_completed"] - off[top]["jobs_completed"]
-            dbr = off[top]["sla_breaches"] - hi["sla_breaches"]
-            if dj > 0 or dbr > 0:
+            if dj > 0:
                 parts.append(
-                    f"At {top} technicians, allowing overtime is worth about {dj} more "
-                    f"jobs and {dbr} fewer SLA breaches — the trade-off against another hire."
+                    f"At {top} technicians, allowing overtime adds about {dj} more jobs at "
+                    f"the cost of {hi['overtime_hours']} overtime hours — the trade-off against "
+                    f"another hire."
+                )
+            else:
+                parts.append(
+                    f"At {top} technicians, overtime no longer adds jobs — the crew already "
+                    f"clears the feasible work, so hiring beats paying overtime here."
                 )
     return " ".join(parts)
 
