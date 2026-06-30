@@ -47,6 +47,11 @@ def _seed_master(session: Session, inst: Instance) -> None:
         )
     for site in inst.sites:
         session.add(Site(id=site.id, name=site.name, x=site.x, y=site.y, zone=site.zone))
+    # Flush parents (skills, sites) before adding jobs. Job.site_id / required_skill
+    # are bare ForeignKey columns with no relationship(), so the unit of work does
+    # not guarantee parents insert first. SQLite ignores FKs, but Postgres enforces
+    # them and rejects the jobs batch otherwise.
+    session.flush()
     for j in inst.jobs:
         session.add(
             Job(
