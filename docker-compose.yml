@@ -28,6 +28,11 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/dispatch
       CORS_ORIGINS: "http://localhost:3000"
+      # Real road routing is opt-in; defaults to free offline haversine.
+      # Provide your own key in the host environment or a .env file.
+      ROUTING_PROVIDER: "${ROUTING_PROVIDER:-haversine}"
+      ORS_API_KEY: "${ORS_API_KEY:-}"
+      OSRM_BASE_URL: "${OSRM_BASE_URL:-}"
     ports:
       - "127.0.0.1:8000:8000"
     depends_on:

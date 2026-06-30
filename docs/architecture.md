@@ -40,7 +40,12 @@ and fully testable.
   `domain.py` (`Instance`, `Plan`, `Assignment`). This is what makes the engine
   unit-testable without infrastructure and easy to reason about.
 - **Generator** (`backend/app/generator.py`) builds one canonical, reproducible
-  "day" as an `Instance`. Same seed ⇒ identical data.
+  "day" as an `Instance`, with sites at real lat/long. Same seed ⇒ identical data.
+- **Travel provider** is resolved behind one seam (`Instance.travel`). The default
+  is offline haversine; `backend/app/routing.py` can inject a matrix-backed
+  provider with real road durations from OpenRouteService (bring your own key) or
+  OSRM, falling back to haversine on any error. The CP-SAT model uses directional
+  arcs, so asymmetric road times need no model changes.
 - **Persistence** (`backend/app/`) mirrors master data into the database and
   stores every solve, so SQL views can report on real runs.
 - **API** (`backend/app/main.py`) is a thin orchestration layer.
