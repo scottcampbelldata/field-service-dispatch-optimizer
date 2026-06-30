@@ -145,6 +145,11 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
       // behind a technician diamond.
       const techPane = map.createPane("techPane");
       techPane.style.zIndex = "620";
+      // Route stop markers sit just above the tech bases (but below tooltips/
+      // popups) so a numbered stop is never hidden under a home-base diamond
+      // it shares coordinates with.
+      const stopPane = map.createPane("stopPane");
+      stopPane.style.zIndex = "630";
 
       mapRef.current = map;
       layerRef.current = L.layerGroup().addTo(map);
@@ -227,7 +232,7 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
             html: `<div class="route-stop" style="background:${color}">${s.seq + 1}</div>`,
             iconSize: [20, 20], iconAnchor: [10, 10],
           });
-          const m = L.marker([s.y, s.x], { icon }).addTo(layer);
+          const m = L.marker([s.y, s.x], { icon, pane: "stopPane" }).addTo(layer);
           m.bindTooltip(`#${s.job_id} · stop ${s.seq + 1}`, { direction: "top" });
           m.bindPopup(stopPopup(s, rt.tech_name, color));
         });
@@ -238,6 +243,12 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
     // --- technician home bases (always shown) ---
     const stopsByTech = new Map<string, number>();
     routes?.forEach((rt) => stopsByTech.set(rt.tech_name, rt.stops.length));
+    // When a route is isolated, fade the other crews' home bases so the
+    // selected route's stops read clearly instead of competing with a dozen
+    // diamonds.
+    const selectedTechName = selected != null
+      ? routes?.find((rt) => rt.tech_id === selected)?.tech_name ?? null
+      : null;
     technicians.forEach((t) => {
       const icon = L.divIcon({
         className: "",
@@ -245,6 +256,7 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
         iconSize: [16, 16], iconAnchor: [8, 8],
       });
       const m = L.marker([t.home_y, t.home_x], { icon, pane: "techPane", riseOnHover: true }).addTo(layer);
+      if (selectedTechName != null && t.name !== selectedTechName) m.setOpacity(0.25);
       m.bindTooltip(`${t.name}${hasRoutes ? "" : " · home base"}`, { direction: "top" });
       m.bindPopup(techPopup(t, stopsByTech.get(t.name)));
       if (!hasRoutes || selected === null) bounds.push([t.home_y, t.home_x]);
