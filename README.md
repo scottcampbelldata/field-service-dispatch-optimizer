@@ -187,9 +187,11 @@ ruff check backend data-generator   # lint
 ```
 
 Covers travel math, domain invariants, the greedy baseline, the CP-SAT model
-(including "optimized never loses to baseline" and optimality-gap reporting), the
-parameter transforms, metrics, the cost model, capacity sweep, generator
-determinism, persistence + SQL views, routing providers, and the API endpoints.
+(including the warm-start guarantee that the optimized objective and completed-job
+count never fall below the baseline within the solve budget, plus optimality-gap
+reporting), the parameter transforms, metrics, the cost model, capacity sweep,
+generator determinism, persistence + SQL views, routing providers, and the API
+endpoints.
 
 **GitHub Actions** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs
 ruff + pytest on the backend and a type-checked Next.js build on the frontend for

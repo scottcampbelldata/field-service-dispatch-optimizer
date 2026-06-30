@@ -212,6 +212,7 @@ export default function ComparePage() {
 
 function RecommendationBanner({ b, o, c }: { b: Metrics; o: Metrics; c: Comparison }) {
   const travelPct = b.travel_hours > 0 ? Math.round((-c.travel_hours_delta / b.travel_hours) * 100) : 0;
+  const slaPct = b.sla_breaches > 0 ? Math.round((-c.sla_breaches_delta / b.sla_breaches) * 100) : 0;
   return (
     <div className="panel p-5" style={{ borderLeft: "4px solid var(--accent)" }}>
       <div className="text-xs uppercase tracking-wide" style={{ color: "var(--accent)" }}>
@@ -223,7 +224,9 @@ function RecommendationBanner({ b, o, c }: { b: Metrics; o: Metrics; c: Comparis
         <strong>{o.sla_breaches}</strong> breach{o.sla_breaches === 1 ? "" : "es"}.
         Versus manual dispatch that is{" "}
         <strong style={{ color: "var(--good)" }}>{c.jobs_completed_delta >= 0 ? "+" : ""}{c.jobs_completed_delta} jobs</strong>,{" "}
-        <strong style={{ color: "var(--good)" }}>{-c.sla_breaches_delta} fewer breaches</strong>
+        <strong style={{ color: "var(--good)" }}>
+          {-c.sla_breaches_delta} fewer breaches{slaPct > 0 ? ` (${slaPct}% less SLA risk)` : ""}
+        </strong>
         {travelPct > 0 && <>, <strong style={{ color: "var(--good)" }}>{travelPct}% less travel</strong></>}, at{" "}
         <strong>{o.avg_utilization}%</strong> technician utilization.
       </p>
