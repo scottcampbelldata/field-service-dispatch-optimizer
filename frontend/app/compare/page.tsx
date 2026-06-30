@@ -6,7 +6,7 @@ import { MetricCard } from "@/components/MetricCard";
 import MapView from "@/components/MapView";
 import { useDispatch } from "@/app/providers";
 import { CostImpact, Metrics, Comparison } from "@/lib/api";
-import { REASON_LABEL, hhmm } from "@/lib/format";
+import { deferralReason, hhmm } from "@/lib/format";
 
 const usd = (n: number) => `$${Math.round(n).toLocaleString()}`;
 
@@ -114,7 +114,11 @@ export default function ComparePage() {
         </div>
       </div>
 
+      <RecommendationBanner b={b} o={o} c={c} />
+
       {result.cost && <CostImpactPanel cost={result.cost} />}
+
+      <Scorecard b={b} o={o} c={c} />
 
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
         <MetricCard label="Jobs completed" value={o.jobs_completed} delta={c.jobs_completed_delta} />
@@ -192,7 +196,7 @@ export default function ComparePage() {
                     <td className="px-4 py-2 mono">#{u.job_id}</td>
                     <td className="px-4 py-2">{u.required_skill}</td>
                     <td className="px-4 py-2 text-xs" style={{ color: "var(--muted)" }}>
-                      {REASON_LABEL[u.reason] ?? u.reason}
+                      {deferralReason(u.reason, u.required_skill)}
                     </td>
                     <td className="px-4 py-2 mono text-xs">{hhmm(u.start)}</td>
                   </tr>
@@ -202,6 +206,69 @@ export default function ComparePage() {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function RecommendationBanner({ b, o, c }: { b: Metrics; o: Metrics; c: Comparison }) {
+  const travelPct = b.travel_hours > 0 ? Math.round((-c.travel_hours_delta / b.travel_hours) * 100) : 0;
+  return (
+    <div className="panel p-5" style={{ borderLeft: "4px solid var(--accent)" }}>
+      <div className="text-xs uppercase tracking-wide" style={{ color: "var(--accent)" }}>
+        Recommended plan
+      </div>
+      <p className="mt-2 text-lg leading-relaxed">
+        Assign <strong>{o.jobs_completed} of {o.jobs_total}</strong> jobs
+        {o.unassigned > 0 && <> and defer <strong>{o.unassigned}</strong></>}, holding SLA risk to{" "}
+        <strong>{o.sla_breaches}</strong> breach{o.sla_breaches === 1 ? "" : "es"}.
+        Versus manual dispatch that is{" "}
+        <strong style={{ color: "var(--good)" }}>{c.jobs_completed_delta >= 0 ? "+" : ""}{c.jobs_completed_delta} jobs</strong>,{" "}
+        <strong style={{ color: "var(--good)" }}>{-c.sla_breaches_delta} fewer breaches</strong>
+        {travelPct > 0 && <>, <strong style={{ color: "var(--good)" }}>{travelPct}% less travel</strong></>}, at{" "}
+        <strong>{o.avg_utilization}%</strong> technician utilization.
+      </p>
+    </div>
+  );
+}
+
+function Scorecard({ b, o, c }: { b: Metrics; o: Metrics; c: Comparison }) {
+  const rows = [
+    { k: "Jobs completed", b: b.jobs_completed, o: o.jobs_completed, d: c.jobs_completed_delta, better: "high" },
+    { k: "SLA breaches", b: b.sla_breaches, o: o.sla_breaches, d: c.sla_breaches_delta, better: "low" },
+    { k: "Unassigned / deferred", b: b.unassigned, o: o.unassigned, d: c.unassigned_delta, better: "low" },
+    { k: "Travel hours", b: b.travel_hours, o: o.travel_hours, d: c.travel_hours_delta, better: "low" },
+    { k: "Overtime hours", b: b.overtime_hours, o: o.overtime_hours, d: c.overtime_hours_delta, better: "low" },
+    { k: "Avg utilization (%)", b: b.avg_utilization, o: o.avg_utilization, d: Math.round((o.avg_utilization - b.avg_utilization) * 10) / 10, better: "high" },
+  ];
+  const good = (r: typeof rows[number]) =>
+    r.better === "low" ? r.d < 0 : r.d > 0;
+  return (
+    <div className="panel overflow-hidden">
+      <div className="px-5 py-3 border-b" style={{ borderColor: "var(--border)" }}>
+        <h2 className="font-semibold">Plan scorecard</h2>
+      </div>
+      <table className="w-full text-sm">
+        <thead style={{ color: "var(--muted)" }}>
+          <tr>
+            <th className="text-left font-medium px-5 py-2">Metric</th>
+            <th className="text-right font-medium px-5 py-2">Manual</th>
+            <th className="text-right font-medium px-5 py-2">Optimized</th>
+            <th className="text-right font-medium px-5 py-2">Change</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.k} className="border-t" style={{ borderColor: "var(--border)" }}>
+              <td className="px-5 py-2">{r.k}</td>
+              <td className="px-5 py-2 text-right mono" style={{ color: "var(--muted)" }}>{r.b}</td>
+              <td className="px-5 py-2 text-right mono font-semibold">{r.o}</td>
+              <td className="px-5 py-2 text-right mono" style={{ color: good(r) ? "var(--good)" : r.d === 0 ? "var(--muted)" : "var(--bad)" }}>
+                {r.d > 0 ? "+" : ""}{r.d}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
