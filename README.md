@@ -32,6 +32,9 @@ limited people, time, travel, skills, and SLA risk, what should we do next?
 ### Constraint Explorer — why each decision was made
 ![Constraint Explorer](screenshots/constraint-explorer.png)
 
+### Marginal Value of Capacity — the decision frontier
+![Marginal Value of Capacity](screenshots/marginal-value-capacity.png)
+
 ### Scenario Simulator — inject chaos and re-solve
 ![Scenario Simulator](screenshots/scenario-simulator.png)
 
@@ -161,7 +164,7 @@ backend/
   sql/         portable analytical views
   tests/       optimizer, generator, persistence, and API tests
 data-generator/  CLI to seed the database
-frontend/      Next.js dashboard: / board, /results, /compare, /constraints, /scenarios, /summary
+frontend/      Next.js dashboard: / board, /results, /compare, /constraints, /capacity, /scenarios, /summary
 docs/          architecture, optimization-model, data-dictionary, case-study
 deploy/        systemd units, nginx, runbook
 ```

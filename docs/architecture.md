@@ -7,6 +7,7 @@
                 │  /results     Optimizer Results (routes)       │
                 │  /compare     Baseline vs Optimized (money)    │
                 │  /constraints Constraint Explorer (why)        │
+                │  /capacity    Marginal Value of Capacity       │
                 │  /scenarios   Scenario Simulator (chaos)       │
                 │  /summary     Executive Summary (narrative)    │
                 └───────────────┬──────────────────────────────┘
@@ -49,9 +50,12 @@ and fully testable.
 - **Persistence** (`backend/app/`) mirrors master data into the database and
   stores every solve, so SQL views can report on real runs.
 - **API** (`backend/app/main.py`) is a thin orchestration layer.
-- **Frontend** (`frontend/`) is a six-page dashboard sharing one client context:
+- **Frontend** (`frontend/`) is a seven-page dashboard sharing one client context:
   Dispatch Board, Optimizer Results, Baseline vs Optimized, Constraint Explorer,
-  Scenario Simulator, and Executive Summary.
+  Marginal Value of Capacity, Scenario Simulator, and Executive Summary.
+- **Capacity analysis** (`backend/app/sweep_service.py`) sweeps crew size through
+  the optimizer to chart the decision frontier — the marginal value of each added
+  technician and the hire-vs-overtime trade-off. Reuses the engine; nothing persisted.
 
 ## Request flow for `POST /api/optimize`
 

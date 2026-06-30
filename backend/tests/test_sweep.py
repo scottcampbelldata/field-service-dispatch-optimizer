@@ -15,13 +15,13 @@ def test_tech_counts_dedupes_and_clamps():
 
 def test_marginal_value_deltas_and_diminishing():
     series = [
-        {"technician_count": 4, "jobs_completed": 50, "sla_breaches": 30},
-        {"technician_count": 6, "jobs_completed": 62, "sla_breaches": 22},
-        {"technician_count": 8, "jobs_completed": 70, "sla_breaches": 18},
-        {"technician_count": 10, "jobs_completed": 70, "sla_breaches": 18},  # flat
+        {"technician_count": 4, "jobs_completed": 50, "overtime_hours": 18.0},
+        {"technician_count": 6, "jobs_completed": 62, "overtime_hours": 12.0},
+        {"technician_count": 8, "jobs_completed": 70, "overtime_hours": 8.0},
+        {"technician_count": 10, "jobs_completed": 70, "overtime_hours": 8.0},  # flat jobs
     ]
     marginal, diminishing_at = sweep_service.marginal_value(series)
-    assert marginal[0] == {"technician_count": 6, "delta_jobs": 12, "delta_breaches": -8}
+    assert marginal[0] == {"technician_count": 6, "delta_jobs": 12, "delta_overtime": -6.0}
     assert [m["delta_jobs"] for m in marginal] == [12, 8, 0]
     assert diminishing_at == 10  # first count where added tech gains < 1 job
 

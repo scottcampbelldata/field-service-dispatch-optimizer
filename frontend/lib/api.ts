@@ -104,6 +104,40 @@ export const DEFAULT_PARAMS: OptimizeParams = {
   max_solve_seconds: 12,
 };
 
+export interface CapacityPoint {
+  technician_count: number; overtime_allowed: boolean;
+  jobs_completed: number; sla_breaches: number; unassigned: number;
+  overtime_hours: number; travel_hours: number;
+}
+export interface CapacityResult {
+  points: CapacityPoint[];
+  marginal: { technician_count: number; delta_jobs: number; delta_overtime: number }[];
+  diminishing_at: number | null;
+  narrative: string;
+  technician_counts: number[];
+}
+export interface SweepConfig {
+  min_techs: number; max_techs?: number | null;
+  steps: number; per_point_seconds: number; include_overtime_off: boolean;
+}
+export const DEFAULT_SWEEP: SweepConfig = {
+  min_techs: 4, steps: 5, per_point_seconds: 3, include_overtime_off: true,
+};
+
+export async function capacitySweep(
+  params: OptimizeParams, sweep: SweepConfig, routing?: RoutingConfig | null,
+): Promise<CapacityResult> {
+  const body: Record<string, unknown> = { ...params, ...sweep };
+  if (routing && routing.provider !== "haversine") body.routing = routing;
+  const r = await fetch(`${API_BASE}/api/capacity-sweep`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) throw new Error(`capacity-sweep -> ${r.status}`);
+  return r.json();
+}
+
 async function get<T>(path: string): Promise<T> {
   const r = await fetch(`${API_BASE}${path}`, { cache: "no-store" });
   if (!r.ok) throw new Error(`${path} -> ${r.status}`);
