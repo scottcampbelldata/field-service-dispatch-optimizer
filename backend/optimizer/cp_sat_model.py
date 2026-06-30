@@ -207,12 +207,23 @@ def plan_optimized(
     has_solution = status in (cp_model.OPTIMAL, cp_model.FEASIBLE)
     assignments = _extract(instance, solver, visit, starts, has_solution)
 
+    # Optimality gap: how far the incumbent is from CP-SAT's proven bound.
+    gap: float | None = None
+    if has_solution:
+        if status == cp_model.OPTIMAL:
+            gap = 0.0
+        else:
+            incumbent = solver.ObjectiveValue()
+            bound = solver.BestObjectiveBound()
+            gap = round(max(0.0, (bound - incumbent) / max(1.0, abs(incumbent)) * 100.0), 1)
+
     opt_plan = Plan(
         plan_type="optimized",
         assignments=tuple(assignments),
         solve_seconds=elapsed,
         status=solver.StatusName(status),
         objective=compute_objective(instance, Plan("optimized", tuple(assignments), elapsed, "", 0.0)),
+        optimality_gap=gap,
     )
 
     # Safety net: an anytime solver can return a weak incumbent on a short

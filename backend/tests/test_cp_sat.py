@@ -60,6 +60,14 @@ def test_solver_respects_time_bound():
     assert plan.solve_seconds < 15  # generous ceiling over the 2s bound
 
 
+def test_reports_optimality_gap():
+    plan = plan_optimized(_small_instance(), max_seconds=5)
+    assert plan.optimality_gap is not None
+    assert plan.optimality_gap >= 0.0
+    if plan.status == "OPTIMAL":
+        assert plan.optimality_gap == 0.0
+
+
 def test_never_completes_fewer_jobs_than_baseline_even_on_short_solve():
     # Throughput floor: even with a tiny time budget on a realistic instance,
     # the optimizer must complete at least as many jobs as the manual baseline.

@@ -24,6 +24,13 @@ class Settings(BaseSettings):
     osrm_base_url: str = ""
     routing_max_points: int = 50
 
+    # Cost model ($). Illustrative defaults; override via env.
+    cost_sla_breach_usd: float = 250.0
+    cost_overtime_hour_usd: float = 60.0
+    cost_travel_hour_usd: float = 40.0
+    cost_unassigned_job_usd: float = 120.0
+    cost_work_days: int = 260
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
