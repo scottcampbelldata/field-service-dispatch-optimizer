@@ -253,19 +253,44 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
     if (bounds.length) map.fitBounds(bounds, { padding: [28, 28], maxZoom: 14 });
   }, [ready, technicians, jobs, routes, selected]);
 
-  const showClear = selected !== null && !!routes?.length;
-
   return (
     <div className="relative w-full h-full">
       <div ref={elRef} className="absolute inset-0 rounded-md overflow-hidden"
         style={{ background: "var(--panel-2)" }} />
 
-      {showClear && (
-        <button onClick={() => setSelected(null)}
-          className="absolute z-[600] right-2 top-2 rounded-md px-2.5 py-1 text-xs font-medium"
-          style={{ background: "var(--accent)", color: "var(--accent-contrast)" }}>
-          Show all routes
-        </button>
+      {/* Interactive route legend: click a tech to isolate its route. Mirrors
+          clicking the polyline, but discoverable and precise where the lines
+          overlap. Selection is shared state, so map and legend stay in sync. */}
+      {!!routes?.length && (
+        <div className="absolute z-[600] right-2 top-2 w-44 rounded-md text-[11px]"
+          style={{ background: "color-mix(in srgb, var(--surface-1) 92%, transparent)", border: "1px solid var(--border)", backdropFilter: "blur(4px)" }}>
+          <div className="flex items-center justify-between gap-2 px-2 pt-1.5 pb-1">
+            <span className="font-medium" style={{ color: "var(--text-muted)" }}>Routes</span>
+            {selected !== null && (
+              <button onClick={() => setSelected(null)} className="font-medium" style={{ color: "var(--accent)" }}>
+                Show all
+              </button>
+            )}
+          </div>
+          <div className="max-h-[190px] overflow-auto px-1 pb-1 space-y-0.5">
+            {routes.map((rt, i) => {
+              const color = `hsl(${ROUTE_HUES[i % ROUTE_HUES.length]} 80% 60%)`;
+              const isSel = selected === rt.tech_id;
+              const dim = selected !== null && !isSel;
+              return (
+                <button key={rt.tech_id}
+                  onClick={() => setSelected((p) => (p === rt.tech_id ? null : rt.tech_id))}
+                  title={`${rt.tech_name} · ${rt.stops.length} stop${rt.stops.length === 1 ? "" : "s"}`}
+                  className="flex items-center gap-1.5 w-full text-left rounded px-1.5 py-0.5"
+                  style={{ background: isSel ? "color-mix(in srgb, var(--accent) 18%, transparent)" : "transparent", opacity: dim ? 0.55 : 1 }}>
+                  <span style={{ width: 10, height: 10, borderRadius: 2, background: color, display: "inline-block", flex: "0 0 auto" }} />
+                  <span className="truncate" style={{ color: "var(--text-muted)" }}>{rt.tech_name}</span>
+                  <span className="ml-auto mono" style={{ color: "var(--text-faint)" }}>{rt.stops.length}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       )}
 
       <div className="absolute z-[500] left-2 bottom-2 rounded-md px-2.5 py-2 text-[11px] space-y-1"
@@ -280,7 +305,7 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
           tech home base
         </div>
         {routes?.length ? (
-          <div className="pt-1" style={{ color: "var(--accent)" }}>click a route to isolate</div>
+          <div className="pt-1" style={{ color: "var(--accent)" }}>click a route or list row to isolate</div>
         ) : (
           <div className="pt-1" style={{ color: "var(--text-faint)" }}>backlog by site location · optimize to assign</div>
         )}
