@@ -18,6 +18,7 @@ export const metadata: Metadata = {
     "Live OR-Tools CP-SAT dispatch optimization compared against a manual baseline.",
 };
 
+import { ThemeProvider } from "next-themes";
 import { DispatchProvider } from "./providers";
 import { Header } from "@/components/Header";
 
@@ -29,13 +30,16 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <DispatchProvider>
-          <Header />
-          <main className="flex-1">{children}</main>
-        </DispatchProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <DispatchProvider>
+            <Header />
+            <main className="flex-1">{children}</main>
+          </DispatchProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

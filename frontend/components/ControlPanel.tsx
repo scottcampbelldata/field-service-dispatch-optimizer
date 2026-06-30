@@ -114,7 +114,7 @@ export function ControlPanel() {
               className="rounded-md px-2 py-1.5 text-sm capitalize"
               style={{
                 background: params.sla_strictness === s ? "var(--accent)" : "var(--panel-2)",
-                color: params.sla_strictness === s ? "#06202b" : "var(--muted)",
+                color: params.sla_strictness === s ? "var(--accent-contrast)" : "var(--muted)",
                 border: "1px solid var(--border)",
               }}>
               {s}
@@ -143,7 +143,7 @@ export function ControlPanel() {
 
       <button onClick={handleOptimize} disabled={loading}
         className="w-full rounded-md py-2.5 font-semibold transition-opacity"
-        style={{ background: "var(--accent)", color: "#06202b", opacity: loading ? 0.6 : 1 }}>
+        style={{ background: "var(--accent)", color: "var(--accent-contrast)", opacity: loading ? 0.6 : 1 }}>
         {loading ? "Solving…" : "Optimize Schedule"}
       </button>
     </div>

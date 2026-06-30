@@ -116,7 +116,9 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
         "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
         { attribution: "&copy; OpenStreetMap &copy; CARTO", subdomains: "abcd", maxZoom: 19 },
       );
-      streets.addTo(map);
+      // Default basemap follows the app theme (Dark tiles in dark mode).
+      const isDark = document.documentElement.classList.contains("dark");
+      (isDark ? dark : streets).addTo(map);
       // Pair street labels with satellite imagery so roads stay readable.
       const satelliteHybrid = L.layerGroup([satellite, labels]);
       L.control.layers(
@@ -241,7 +243,7 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
       {showClear && (
         <button onClick={() => setSelected(null)}
           className="absolute z-[600] right-2 top-2 rounded-md px-2.5 py-1 text-xs font-medium"
-          style={{ background: "var(--accent)", color: "#06202b" }}>
+          style={{ background: "var(--accent)", color: "var(--accent-contrast)" }}>
           Show all routes
         </button>
       )}

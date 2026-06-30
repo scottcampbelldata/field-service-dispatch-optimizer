@@ -109,7 +109,7 @@ function RouteRow({ route, shift, dayStart, dayEnd }: {
               background: priorityColor(s.priority),
               border: s.is_sla_breach ? "2px solid var(--bad)" : s.is_overtime ? "2px solid var(--warn)" : "none",
             }}>
-            <span className="text-[10px] font-medium mono" style={{ color: "#06202b" }}>{s.seq + 1}</span>
+            <span className="text-[10px] font-medium mono" style={{ color: "var(--accent-contrast)" }}>{s.seq + 1}</span>
           </div>
         ))}
       </div>
