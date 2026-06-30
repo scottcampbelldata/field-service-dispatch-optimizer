@@ -18,8 +18,8 @@ from backend.optimizer.domain import (
     Instance,
     JobDC,
     Params,
-    Skill,
     SiteDC,
+    Skill,
     TechnicianDC,
 )
 from backend.optimizer.travel import make_euclidean_provider

@@ -20,8 +20,8 @@ from backend.optimizer.domain import (
     Instance,
     JobDC,
     Params,
-    Skill,
     SiteDC,
+    Skill,
     TechnicianDC,
 )
 
