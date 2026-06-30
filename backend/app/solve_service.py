@@ -10,7 +10,7 @@ from backend.app import repository, serialize
 from backend.app.db import SessionLocal
 from backend.optimizer.baseline import plan_baseline
 from backend.optimizer.cp_sat_model import plan_optimized
-from backend.optimizer.metrics import compare, plan_metrics
+from backend.optimizer.metrics import compare, plan_diagnostics, plan_metrics
 
 
 def optimize(params: dict) -> dict:
@@ -50,4 +50,5 @@ def optimize(params: dict) -> dict:
             "unassigned": serialize.unassigned(inst, optimized),
         },
         "comparison": compare(base_metrics, opt_metrics),
+        "diagnostics": plan_diagnostics(inst, optimized),
     }
