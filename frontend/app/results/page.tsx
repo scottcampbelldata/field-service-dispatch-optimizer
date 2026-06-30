@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { EmptyState } from "@/components/EmptyState";
+import MapView from "@/components/MapView";
 import { useDispatch } from "@/app/providers";
 import { Route, Stop } from "@/lib/api";
 import { hhmm, priorityColor } from "@/lib/format";
@@ -35,7 +36,8 @@ export default function ResultsPage() {
         <h1 className="text-2xl font-semibold">Optimizer results</h1>
         <p className="text-sm mt-1" style={{ color: "var(--muted)" }}>
           Recommended assignment and route order — {routes.length} technicians dispatched,
-          solver {result.optimized.metrics.solve_status} in {result.optimized.metrics.solve_seconds}s.
+          solver {result.optimized.metrics.solve_status} in {result.optimized.metrics.solve_seconds}s ·
+          travel via {result.routing.provider}.
         </p>
       </div>
 
@@ -44,6 +46,16 @@ export default function ResultsPage() {
         <Mini label="Jobs scheduled" value={result.optimized.metrics.jobs_completed} />
         <Mini label="Late jobs (SLA risk)" value={lateStops.length} tone={lateStops.length ? "bad" : "good"} />
         <Mini label="Overtime jobs" value={otStops.length} tone={otStops.length ? "warn" : "good"} />
+      </div>
+
+      <div className="panel p-4">
+        <h2 className="font-semibold mb-3">Route map</h2>
+        <div className="aspect-[16/9] w-full">
+          <MapView
+            technicians={routes.map((r) => ({ home_x: r.home_x, home_y: r.home_y, name: r.tech_name }))}
+            routes={routes}
+          />
+        </div>
       </div>
 
       <div className="panel p-5">

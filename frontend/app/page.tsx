@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { ControlPanel } from "@/components/ControlPanel";
-import { RegionMap } from "@/components/RegionMap";
+import MapView from "@/components/MapView";
 import { useDispatch } from "@/app/providers";
 import { PRIORITY_LABEL, hhmm, priorityColor } from "@/lib/format";
 
@@ -59,11 +59,7 @@ export default function BoardPage() {
             <Legend />
           </div>
           <div className="aspect-[16/10] w-full">
-            <RegionMap
-              technicians={visibleTechs}
-              jobs={visibleJobs}
-              region={workload?.region ?? 100}
-            />
+            <MapView technicians={visibleTechs} jobs={visibleJobs} />
           </div>
         </div>
 

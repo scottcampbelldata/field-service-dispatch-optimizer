@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { BeforeAfterChart, UtilizationChart } from "@/components/Charts";
 import { MetricCard } from "@/components/MetricCard";
-import { RegionMap } from "@/components/RegionMap";
+import MapView from "@/components/MapView";
 import { useDispatch } from "@/app/providers";
 import { Metrics, Comparison } from "@/lib/api";
 import { REASON_LABEL, hhmm } from "@/lib/format";
 
 export default function ComparePage() {
-  const { result, loading, runOptimize, workload } = useDispatch();
+  const { result, loading, runOptimize } = useDispatch();
 
   if (!result) {
     return (
@@ -108,12 +108,11 @@ export default function ComparePage() {
         <div className="panel p-4">
           <h2 className="font-semibold mb-3">Optimized routes</h2>
           <div className="aspect-[16/10] w-full">
-            <RegionMap
+            <MapView
               technicians={result.optimized.routes.map((r) => ({
                 home_x: r.home_x, home_y: r.home_y, name: r.tech_name,
               }))}
               routes={result.optimized.routes}
-              region={workload?.region ?? 100}
             />
           </div>
         </div>
