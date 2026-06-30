@@ -2,6 +2,18 @@
 
 from __future__ import annotations
 
+import os
+import pathlib
+import tempfile
+
+# Point the whole test session at a throwaway SQLite file so the global engine
+# never touches the developer's real ./dispatch.db. Must run before any import
+# of backend.app.config / db.
+_TEST_DB = pathlib.Path(tempfile.gettempdir()) / "dispatch_test.db"
+if _TEST_DB.exists():
+    _TEST_DB.unlink()
+os.environ["DATABASE_URL"] = f"sqlite:///{_TEST_DB}"
+
 from backend.optimizer.domain import (
     Instance,
     JobDC,
