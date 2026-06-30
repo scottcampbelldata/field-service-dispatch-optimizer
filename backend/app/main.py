@@ -8,10 +8,10 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
-from backend.app import repository, routing, serialize, solve_service
+from backend.app import repository, routing, serialize, solve_service, sweep_service
 from backend.app.config import settings
 from backend.app.db import SessionLocal
-from backend.app.schemas import OptimizeRequest
+from backend.app.schemas import CapacitySweepRequest, OptimizeRequest
 
 
 @asynccontextmanager
@@ -64,6 +64,11 @@ def workload() -> dict:
 @app.post("/api/optimize")
 def optimize(req: OptimizeRequest) -> dict:
     return solve_service.optimize(req.to_transform_kwargs(), routing_override=req.routing_override())
+
+
+@app.post("/api/capacity-sweep")
+def capacity_sweep(req: CapacitySweepRequest) -> dict:
+    return sweep_service.capacity_sweep(req.scenario_kwargs(), **req.sweep_kwargs())
 
 
 @app.get("/api/runs/{run_id}")
