@@ -34,3 +34,15 @@ def test_every_skill_has_two_techs():
     inst = build_base_instance()
     for skill in inst.skills:
         assert len(inst.certified_techs(skill.id)) >= 2
+
+
+def test_coordinates_within_metro_bbox():
+    from backend.app.generator import LAT_MAX, LAT_MIN, LON_MAX, LON_MIN
+
+    inst = build_base_instance()
+    for s in inst.sites:
+        assert LON_MIN <= s.x <= LON_MAX, f"site {s.id} lon out of range"
+        assert LAT_MIN <= s.y <= LAT_MAX, f"site {s.id} lat out of range"
+    for t in inst.technicians:
+        assert LON_MIN <= t.home_x <= LON_MAX
+        assert LAT_MIN <= t.home_y <= LAT_MAX

@@ -76,6 +76,8 @@ def unassigned(inst: Instance, plan: Plan) -> list[dict]:
 
 
 def workload(inst: Instance) -> dict:
+    from backend.app import generator as gen
+
     return {
         "technicians": [technician_dict(inst, t) for t in inst.technicians],
         "sites": [
@@ -84,5 +86,10 @@ def workload(inst: Instance) -> dict:
         ],
         "jobs": [job_dict(inst, j) for j in inst.jobs],
         "skills": [{"id": s.id, "name": s.name} for s in inst.skills],
-        "region": 100.0,
+        "region": {
+            "name": gen.METRO_NAME,
+            "center": list(gen.CENTER),       # [lon, lat]
+            "lon_min": gen.LON_MIN, "lon_max": gen.LON_MAX,
+            "lat_min": gen.LAT_MIN, "lat_max": gen.LAT_MAX,
+        },
     }
