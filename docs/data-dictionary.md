@@ -2,8 +2,11 @@
 
 All data is synthetic and reproducible from a seeded generator
 (`backend/app/generator.py`, default `seed=42`). Time is integer minutes from the
-start of the operating day (e.g. `480` = 08:00). Coordinates are on a 100×100
-grid; travel time is Euclidean distance × speed factor × traffic multiplier.
+start of the operating day (e.g. `480` = 08:00). Coordinates are **real lat/long**
+within the Dallas–Fort Worth metro (`x` = longitude, `y` = latitude) — the data is
+synthetic, only the coordinate space is real. Travel time defaults to haversine
+(great-circle) distance × speed factor × traffic multiplier, or real road
+durations when a routing provider is configured (see `backend/app/routing.py`).
 
 ## Master data
 
@@ -18,7 +21,7 @@ grid; travel time is Euclidean distance × speed factor × traffic multiplier.
 |--------|------|-------|
 | id | int | PK |
 | name | str | |
-| home_x, home_y | float | grid home base |
+| home_x, home_y | float | home base longitude, latitude |
 | shift_start, shift_end | int | minutes from day start |
 | overtime_eligible | bool | |
 | overtime_cap | int | max overtime minutes beyond shift_end |
@@ -29,8 +32,8 @@ grid; travel time is Euclidean distance × speed factor × traffic multiplier.
 |--------|------|-------|
 | id | int | PK |
 | name | str | |
-| x, y | float | grid location |
-| zone | str | cosmetic region label |
+| x, y | float | site longitude, latitude |
+| zone | str | cosmetic region label (e.g. North West, Downtown) |
 
 ### `jobs`
 | column | type | notes |

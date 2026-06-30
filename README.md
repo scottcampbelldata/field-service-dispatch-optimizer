@@ -110,17 +110,46 @@ docker compose up --build
 The same SQLAlchemy models and portable SQL views run on both SQLite (local) and
 Postgres (compose / production).
 
+## Maps & routing (bring your own key)
+
+Sites and technicians are placed at real lat/long across the Dallas–Fort Worth
+metro (still fully synthetic data) and rendered on a Leaflet map with keyless
+CartoDB tiles. Travel times come from a **pluggable provider** chosen with
+`ROUTING_PROVIDER`:
+
+| Provider | Setting | Key needed | Notes |
+|----------|---------|-----------|-------|
+| Haversine | `haversine` (default) | none | Great-circle distance. Free, offline, reproducible — powers the public demo. |
+| OpenRouteService | `openrouteservice` | **your** `ORS_API_KEY` ([free signup](https://openrouteservice.org/dev/#/signup)) | Real road-network durations via the Matrix API. |
+| OSRM | `osrm` + `OSRM_BASE_URL` | none | Real road durations from a self-hosted or public OSRM server. |
+
+The provider is resolved per request and **degrades gracefully**: if it is
+unconfigured, over the point cap, or the API call fails, travel falls back to
+haversine and the active provider is reported in the optimize response and on the
+Results page. **No key ever lives in the repo** — copy `.env.example` to `.env`
+and set your own. The optimizer model is unchanged by the provider: travel is
+resolved behind a single seam (`Instance.travel`), and the CP-SAT model already
+uses directional arcs, so real asymmetric road times drop in with no model
+changes.
+
+```bash
+# Enable real road routing with your own free key:
+ROUTING_PROVIDER=openrouteservice
+ORS_API_KEY=your-key-here
+```
+
 ## Tech stack
 
 Python 3.12 · OR-Tools (CP-SAT) · FastAPI · SQLAlchemy 2 · PostgreSQL / SQLite ·
-Next.js (App Router) + TypeScript · pytest.
+Next.js (App Router) + TypeScript · Leaflet · OpenRouteService / OSRM (optional) ·
+pytest.
 
 ## Project structure
 
 ```
 backend/
   optimizer/   pure-Python engine: domain, travel, baseline, cp_sat_model, transform, metrics
-  app/         FastAPI app, config, db, models, repository, generator, solve_service
+  app/         FastAPI app, config, db, models, repository, generator, routing, solve_service
   sql/         portable analytical views
   tests/       optimizer, generator, persistence, and API tests
 data-generator/  CLI to seed the database
