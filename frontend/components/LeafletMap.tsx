@@ -263,7 +263,14 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
       if (!hasRoutes || selected === null) bounds.push([t.home_y, t.home_x]);
     });
 
-    if (bounds.length) map.fitBounds(bounds, { padding: [28, 28], maxZoom: 14 });
+    // Reserve the top-right column for the Routes legend and a little bottom
+    // room for the priority legend / attribution, so auto-fitting an isolated
+    // route never frames its stops underneath an overlay panel.
+    if (bounds.length) map.fitBounds(bounds, {
+      paddingTopLeft: [24, 24],
+      paddingBottomRight: [hasRoutes ? 196 : 24, 56],
+      maxZoom: 14,
+    });
   }, [ready, technicians, jobs, routes, selected]);
 
   return (
