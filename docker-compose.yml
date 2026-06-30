@@ -1,0 +1,50 @@
+# Local full stack: Postgres + FastAPI + Next.js.
+#   docker compose up --build
+# Then open http://localhost:3000 (web) and http://localhost:8000/docs (API).
+services:
+  db:
+    image: postgres:16
+    container_name: dispatch-db
+    environment:
+      POSTGRES_DB: dispatch
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    # Loopback-bound: reachable only from the host, never the LAN.
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - dispatch-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d dispatch"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: dispatch-api
+    environment:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/dispatch
+      CORS_ORIGINS: "http://localhost:3000"
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: dispatch-web
+    environment:
+      NEXT_PUBLIC_API_BASE: "http://localhost:8000"
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      - api
+
+volumes:
+  dispatch-pgdata:
