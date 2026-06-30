@@ -229,11 +229,31 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
       line.on("click", () => setSelected((p) => (p === rt.tech_id ? null : rt.tech_id)));
 
       if (!dim) {
+        // Several jobs can sit at the same site (up to 8 in this dataset), so
+        // multiple stops share one coordinate. Fan co-located stops around the
+        // point via icon anchor so each numbered marker stays visible and
+        // clickable; the anchor keeps them tied to the true location.
+        const coLocTotal = new Map<string, number>();
         rt.stops.forEach((s) => {
+          const k = `${s.x},${s.y}`;
+          coLocTotal.set(k, (coLocTotal.get(k) ?? 0) + 1);
+        });
+        const coLocSeen = new Map<string, number>();
+        rt.stops.forEach((s) => {
+          const k = `${s.x},${s.y}`;
+          const total = coLocTotal.get(k) ?? 1;
+          const idx = coLocSeen.get(k) ?? 0;
+          coLocSeen.set(k, idx + 1);
+          let anchor: [number, number] = [10, 10];
+          if (total > 1) {
+            const ang = (2 * Math.PI * idx) / total - Math.PI / 2;
+            const r = 11;
+            anchor = [10 - r * Math.cos(ang), 10 - r * Math.sin(ang)];
+          }
           const icon = L.divIcon({
             className: "route-stop-wrap",
             html: `<div class="route-stop" style="background:${color}">${s.seq + 1}</div>`,
-            iconSize: [20, 20], iconAnchor: [10, 10],
+            iconSize: [20, 20], iconAnchor: anchor,
           });
           const m = L.marker([s.y, s.x], { icon, pane: "stopPane" }).addTo(layer);
           m.bindTooltip(`#${s.job_id} · stop ${s.seq + 1}`, { direction: "top" });
