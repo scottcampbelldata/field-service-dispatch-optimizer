@@ -7,7 +7,7 @@ backlog is deliberately larger than the crews can fully complete, so there is a
 real planning problem (and a visible gap between the naive baseline and the
 optimizer).
 
-Coordinates are real (Dallas–Fort Worth metro) so the map and a real routing
+Coordinates are real (Dallas-Fort Worth metro) so the map and a real routing
 engine work, but the sites, technicians, and jobs themselves are entirely
 synthetic. No proprietary or employer data is used.
 """
@@ -25,8 +25,8 @@ from backend.optimizer.domain import (
     TechnicianDC,
 )
 
-# Metro service region (Dallas–Fort Worth). x = longitude, y = latitude.
-METRO_NAME = "Dallas–Fort Worth"
+# Metro service region (Dallas-Fort Worth). x = longitude, y = latitude.
+METRO_NAME = "Dallas-Fort Worth"
 LON_MIN, LON_MAX = -96.95, -96.55
 LAT_MIN, LAT_MAX = 32.70, 33.00
 CENTER = ((LON_MIN + LON_MAX) / 2, (LAT_MIN + LAT_MAX) / 2)

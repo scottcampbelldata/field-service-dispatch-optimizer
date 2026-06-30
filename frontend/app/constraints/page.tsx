@@ -24,7 +24,7 @@ export default function ConstraintsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Constraint explorer</h1>
         <p className="text-sm mt-1" style={{ color: "var(--muted)" }}>
-          Why the optimizer made the calls it did — the binding constraints behind every
+          Why the optimizer made the calls it did - the binding constraints behind every
           unassigned or late job.
         </p>
       </div>
@@ -48,7 +48,7 @@ export default function ConstraintsPage() {
             </div>
             <p className="text-xs mt-2" style={{ color: "var(--muted)" }}>
               {capPct > 100
-                ? "Demand exceeds raw capacity — some jobs cannot be served without more technicians or overtime, regardless of routing."
+                ? "Demand exceeds raw capacity - some jobs cannot be served without more technicians or overtime, regardless of routing."
                 : "Raw capacity is sufficient; remaining gaps come from skills, parts, travel, and SLA timing, not headcount."}
             </p>
           </div>
@@ -74,7 +74,7 @@ export default function ConstraintsPage() {
                 {d.unassigned_by_reason.map((r) => (
                   <li key={r.reason} className="text-xs" style={{ color: "var(--muted)" }}>
                     <span style={{ color: "var(--foreground)" }}>{REASON_LABEL[r.reason] ?? r.reason}</span>
-                    {" — "}{REASON_EXPLAIN[r.reason]}
+                    {" - "}{REASON_EXPLAIN[r.reason]}
                   </li>
                 ))}
               </ul>

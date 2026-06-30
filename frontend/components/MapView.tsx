@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 
 // Leaflet touches `window`, so it must load client-only (ssr: false), which is
-// only allowed inside a Client Component — hence this thin wrapper.
+// only allowed inside a Client Component - hence this thin wrapper.
 const MapView = dynamic(() => import("./LeafletMap"), {
   ssr: false,
   loading: () => (

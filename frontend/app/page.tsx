@@ -97,7 +97,7 @@ export default function BoardPage() {
                         ? <span style={{ color: j.part_available ? "var(--good)" : "var(--bad)" }}>
                             {j.part_available ? "in stock" : "missing"}
                           </span>
-                        : <span style={{ color: "var(--muted)" }}>—</span>}
+                        : <span style={{ color: "var(--muted)" }}>-</span>}
                     </Td>
                   </tr>
                 ))}

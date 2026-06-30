@@ -35,7 +35,7 @@ export default function ResultsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Optimizer results</h1>
         <p className="text-sm mt-1" style={{ color: "var(--muted)" }}>
-          Recommended assignment and route order — {routes.length} technicians dispatched,
+          Recommended assignment and route order - {routes.length} technicians dispatched,
           solver {result.optimized.metrics.solve_status} in {result.optimized.metrics.solve_seconds}s
           {result.optimized.optimality_gap != null && (
             <> · {result.optimized.optimality_gap === 0
@@ -77,7 +77,7 @@ export default function ResultsPage() {
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">
-        <StopTable title={`Late jobs — SLA breached (${lateStops.length})`} stops={lateStops} kind="late" />
+        <StopTable title={`Late jobs - SLA breached (${lateStops.length})`} stops={lateStops} kind="late" />
         <UnassignedTable />
       </div>
     </div>
@@ -120,7 +120,7 @@ function RouteRow({ route, shift, dayStart, dayEnd }: {
 function TimeAxis({ dayStart, dayEnd }: { dayStart: number; dayEnd: number }) {
   return (
     <div className="text-xs mono" style={{ color: "var(--muted)" }}>
-      {hhmm(dayStart)} – {hhmm(dayEnd)}
+      {hhmm(dayStart)} - {hhmm(dayEnd)}
     </div>
   );
 }
@@ -167,7 +167,7 @@ function StopTable({ title, stops }: { title: string; stops: Stop[]; kind: "late
         <table className="w-full text-sm">
           <tbody>
             {stops.length === 0 && (
-              <tr><td className="px-4 py-3" style={{ color: "var(--muted)" }}>None — all scheduled jobs meet SLA.</td></tr>
+              <tr><td className="px-4 py-3" style={{ color: "var(--muted)" }}>None - all scheduled jobs meet SLA.</td></tr>
             )}
             {stops.map((s) => (
               <tr key={s.job_id} className="border-t" style={{ borderColor: "var(--border)" }}>

@@ -3,15 +3,15 @@
 Builds a travel provider backed by real driving durations from a routing engine,
 to be injected onto an Instance before solving. Two backends:
 
-* **OpenRouteService** — set ``ROUTING_PROVIDER=openrouteservice`` and provide
+* **OpenRouteService** - set ``ROUTING_PROVIDER=openrouteservice`` and provide
   your own free key in ``ORS_API_KEY``.
-* **OSRM** — set ``ROUTING_PROVIDER=osrm`` and ``OSRM_BASE_URL`` (self-hosted or
+* **OSRM** - set ``ROUTING_PROVIDER=osrm`` and ``OSRM_BASE_URL`` (self-hosted or
   the public demo server). No key required.
 
 Everything degrades gracefully: if the provider is ``haversine`` (default), not
 configured, over the size cap, or the call fails, this returns ``None`` (the
 Instance then uses its built-in haversine travel) plus a human-readable label
-describing what is actually active. No API key ever lives in the repo — it is
+describing what is actually active. No API key ever lives in the repo - it is
 read from the environment only.
 """
 
@@ -48,17 +48,17 @@ def build_travel_provider(instance: Instance, override: dict | None = None) -> t
     fallback = make_haversine_provider(instance.params.speed_factor)
 
     if len(points) > settings.routing_max_points:
-        return None, f"{HAVERSINE_LABEL} — {len(points)} points over the {settings.routing_max_points} cap for road routing"
+        return None, f"{HAVERSINE_LABEL} - {len(points)} points over the {settings.routing_max_points} cap for road routing"
 
     try:
         if provider == "openrouteservice":
             if not api_key:
-                return None, f"{HAVERSINE_LABEL} — add an OpenRouteService key to enable real road routing"
+                return None, f"{HAVERSINE_LABEL} - add an OpenRouteService key to enable real road routing"
             matrix = _ors_matrix(points, api_key)
             label = "OpenRouteService (real road)"
         elif provider == "osrm":
             if not osrm_url:
-                return None, f"{HAVERSINE_LABEL} — add an OSRM endpoint to enable real road routing"
+                return None, f"{HAVERSINE_LABEL} - add an OSRM endpoint to enable real road routing"
             matrix = _osrm_table(points, osrm_url)
             label = "OSRM (real road)"
         else:
@@ -66,17 +66,17 @@ def build_travel_provider(instance: Instance, override: dict | None = None) -> t
 
         matrix = _fill_missing(matrix, points, fallback)
         return make_matrix_provider(points, matrix, fallback), label
-    except Exception as exc:  # network/parse/quota — never break the demo
-        return None, f"{HAVERSINE_LABEL} — {provider} unavailable ({type(exc).__name__})"
+    except Exception as exc:  # network/parse/quota - never break the demo
+        return None, f"{HAVERSINE_LABEL} - {provider} unavailable ({type(exc).__name__})"
 
 
 def configured_label() -> str:
     """Best-effort label of the configured provider, without making a call."""
     provider = (settings.routing_provider or "haversine").lower()
     if provider == "openrouteservice":
-        return "OpenRouteService (real road)" if settings.ors_api_key else f"{HAVERSINE_LABEL} — no ORS_API_KEY"
+        return "OpenRouteService (real road)" if settings.ors_api_key else f"{HAVERSINE_LABEL} - no ORS_API_KEY"
     if provider == "osrm":
-        return "OSRM (real road)" if settings.osrm_base_url else f"{HAVERSINE_LABEL} — no OSRM_BASE_URL"
+        return "OSRM (real road)" if settings.osrm_base_url else f"{HAVERSINE_LABEL} - no OSRM_BASE_URL"
     return HAVERSINE_LABEL
 
 

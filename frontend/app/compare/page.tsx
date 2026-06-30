@@ -103,7 +103,7 @@ export default function ComparePage() {
         <div>
           <h1 className="text-2xl font-semibold">Manual baseline vs optimized plan</h1>
           <p className="text-sm mt-1" style={{ color: "var(--muted)" }}>
-            Same technicians, jobs, and constraints — only the planning differs.
+            Same technicians, jobs, and constraints - only the planning differs.
           </p>
         </div>
         <div className="text-xs mono" style={{ color: "var(--muted)" }}>
@@ -144,7 +144,7 @@ export default function ComparePage() {
             <div className="mt-1 text-lg font-semibold">
               {o.bottleneck_skill ?? "None"}
               <span className="text-sm font-normal" style={{ color: "var(--muted)" }}>
-                {" "}— most unmet / late demand
+                {" "}- most unmet / late demand
               </span>
             </div>
           </div>
@@ -217,7 +217,7 @@ function buildInsights(b: Metrics, o: Metrics, c: Comparison): string[] {
   if (c.jobs_completed_delta > 0)
     out.push(`${c.jobs_completed_delta} more jobs completed without adding technicians.`);
   if (o.bottleneck_skill)
-    out.push(`The binding constraint is ${o.bottleneck_skill} capacity, not headcount — target hiring or cross-training there.`);
+    out.push(`The binding constraint is ${o.bottleneck_skill} capacity, not headcount - target hiring or cross-training there.`);
   if (o.unassigned > 0)
     out.push(`${o.unassigned} low-value jobs are deferred to protect higher-priority SLAs.`);
   return out;

@@ -22,7 +22,7 @@ export const REASON_LABEL: Record<string, string> = {
   unassigned_no_skill: "No certified technician",
   unassigned_no_part: "Part unavailable",
   unassigned_shift: "No room in any shift",
-  unassigned_capacity: "Dropped — capacity / SLA trade-off",
+  unassigned_capacity: "Dropped - capacity / SLA trade-off",
 };
 
 export function signed(n: number, suffix = ""): string {

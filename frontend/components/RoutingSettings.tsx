@@ -45,7 +45,7 @@ export function RoutingSettings() {
           <div>
             <div className="font-semibold">Travel routing</div>
             <div className="text-xs" style={{ color: "var(--muted)" }}>
-              Applies to your next optimize. Session only — sent per request, never stored.
+              Applies to your next optimize. Session only - sent per request, never stored.
             </div>
           </div>
 

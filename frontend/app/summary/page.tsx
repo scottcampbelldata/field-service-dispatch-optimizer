@@ -78,8 +78,8 @@ function buildBrief(r: OptimizeResult) {
     if (sd) {
       recommendations.push(
         capPct <= 100
-          ? `The bottleneck is not headcount — raw capacity covers ${capPct}% of demand. It is ${sd.skill} availability: ${sd.certified_techs} certified technician(s) against ${sd.jobs} jobs, leaving ${sd.unassigned} unserved and ${sd.breaches} late. Prioritize hiring or cross-training in ${sd.skill}.`
-          : `Demand is ${capPct}% of available technician-hours — the day is over capacity. Adding crew or overtime, concentrated in ${sd.skill}, is the only way to clear the backlog.`
+          ? `The bottleneck is not headcount - raw capacity covers ${capPct}% of demand. It is ${sd.skill} availability: ${sd.certified_techs} certified technician(s) against ${sd.jobs} jobs, leaving ${sd.unassigned} unserved and ${sd.breaches} late. Prioritize hiring or cross-training in ${sd.skill}.`
+          : `Demand is ${capPct}% of available technician-hours - the day is over capacity. Adding crew or overtime, concentrated in ${sd.skill}, is the only way to clear the backlog.`
       );
     }
   }
@@ -95,7 +95,7 @@ function buildBrief(r: OptimizeResult) {
   const deferred = d.unassigned_by_reason.find((x) => x.reason === "unassigned_capacity")?.count ?? 0;
   if (deferred > 0) {
     recommendations.push(
-      `${deferred} low-priority job(s) are deliberately deferred to protect critical SLAs — a deliberate trade-off, not an oversight.`
+      `${deferred} low-priority job(s) are deliberately deferred to protect critical SLAs - a deliberate trade-off, not an oversight.`
     );
   }
 
@@ -105,19 +105,19 @@ function buildBrief(r: OptimizeResult) {
     const lo = Math.round(Math.min(...util));
     const hi = Math.round(Math.max(...util));
     recommendations.push(
-      `Workload is spread across the crew (utilization ${lo}–${hi}%), avoiding the burnout-and-idle split that ad-hoc dispatching creates.`
+      `Workload is spread across the crew (utilization ${lo}-${hi}%), avoiding the burnout-and-idle split that ad-hoc dispatching creates.`
     );
   }
 
   if (recommendations.length === 0) {
-    recommendations.push("The current plan is comfortably within capacity — no structural constraints are binding.");
+    recommendations.push("The current plan is comfortably within capacity - no structural constraints are binding.");
   }
 
   const bottomLine =
     `Versus manual dispatch on the same day: ${c.jobs_completed_delta >= 0 ? "+" : ""}${c.jobs_completed_delta} jobs completed, ` +
     `${-c.sla_breaches_delta} fewer SLA breaches, ` +
     `${c.travel_hours_delta <= 0 ? `${-c.travel_hours_delta}h less travel` : `${c.travel_hours_delta}h more travel`}, and ` +
-    `${c.overtime_hours_delta <= 0 ? `${-c.overtime_hours_delta}h less overtime` : `${c.overtime_hours_delta}h more overtime`} — the same people and trucks, planned better.`;
+    `${c.overtime_hours_delta <= 0 ? `${-c.overtime_hours_delta}h less overtime` : `${c.overtime_hours_delta}h more overtime`} - the same people and trucks, planned better.`;
 
   const costLine = r.cost
     ? ` At the modeled rates that is about $${Math.round(r.cost.savings_per_day).toLocaleString()} per day` +

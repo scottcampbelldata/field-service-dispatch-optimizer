@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Atlas Field Services — Dispatch Optimizer",
+  title: "Atlas Field Services - Dispatch Optimizer",
   description:
     "Live OR-Tools CP-SAT dispatch optimization compared against a manual baseline.",
 };
