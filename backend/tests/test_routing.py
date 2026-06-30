@@ -24,7 +24,7 @@ def test_ors_without_key_falls_back(monkeypatch):
     monkeypatch.setattr(settings, "ors_api_key", "")
     fn, label = routing.build_travel_provider(_metro_instance())
     assert fn is None
-    assert "ORS_API_KEY" in label
+    assert "OpenRouteService" in label and "haversine" in label.lower()
 
 
 def test_ors_with_key_builds_matrix_provider(monkeypatch):
@@ -56,6 +56,22 @@ def test_over_point_cap_falls_back(monkeypatch):
     fn, label = routing.build_travel_provider(_metro_instance())
     assert fn is None
     assert "cap" in label
+
+
+def test_session_override_takes_precedence(monkeypatch):
+    # Server is configured for plain haversine...
+    monkeypatch.setattr(settings, "routing_provider", "haversine")
+    monkeypatch.setattr(settings, "ors_api_key", "")
+
+    durations = [[0, 600, 900], [600, 0, 300], [900, 300, 0]]
+    monkeypatch.setattr(routing, "_post_json", lambda url, body, headers, timeout=20.0: {"durations": durations})
+
+    # ...but the request brings its own session key.
+    override = {"provider": "openrouteservice", "api_key": "session-key", "osrm_base_url": None}
+    fn, label = routing.build_travel_provider(_metro_instance(), override=override)
+    assert fn is not None
+    assert label == "OpenRouteService (real road)"
+    assert fn(-96.80, 32.80, -96.70, 32.85) == 10
 
 
 def test_provider_failure_falls_back(monkeypatch):

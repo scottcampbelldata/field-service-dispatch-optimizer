@@ -7,6 +7,14 @@ from typing import Literal, Optional
 from pydantic import BaseModel, Field
 
 
+class RoutingOverride(BaseModel):
+    """Per-request, session-only routing config from the UI. Takes precedence
+    over server env config; never persisted or logged."""
+    provider: Optional[Literal["haversine", "openrouteservice", "osrm"]] = None
+    api_key: Optional[str] = None
+    osrm_base_url: Optional[str] = None
+
+
 class OptimizeRequest(BaseModel):
     technician_count: Optional[int] = Field(default=None, ge=1, le=50)
     job_count: Optional[int] = Field(default=None, ge=1, le=500)
@@ -17,6 +25,12 @@ class OptimizeRequest(BaseModel):
     overtime_allowed: bool = True
     optimization_goal: Literal["balanced", "max_jobs", "min_travel", "protect_sla"] = "balanced"
     max_solve_seconds: Optional[float] = Field(default=None, ge=1.0, le=30.0)
+    routing: Optional[RoutingOverride] = None
 
     def to_transform_kwargs(self) -> dict:
-        return self.model_dump()
+        d = self.model_dump()
+        d.pop("routing", None)
+        return d
+
+    def routing_override(self) -> Optional[dict]:
+        return self.routing.model_dump() if self.routing else None

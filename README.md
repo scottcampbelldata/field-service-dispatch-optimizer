@@ -123,6 +123,14 @@ CartoDB tiles. Travel times come from a **pluggable provider** chosen with
 | OpenRouteService | `openrouteservice` | **your** `ORS_API_KEY` ([free signup](https://openrouteservice.org/dev/#/signup)) | Real road-network durations via the Matrix API. |
 | OSRM | `osrm` + `OSRM_BASE_URL` | none | Real road durations from a self-hosted or public OSRM server. |
 
+Two ways to set the provider:
+
+- **Server-side** via `.env` (below) — applies to everyone.
+- **In-app, per visitor** via the **Routing** gear in the header — pick a provider
+  and paste your own key; it is sent **per request for that browser session only**
+  and never stored. This lets anyone try real road routing on the live demo
+  without a key being configured on the server.
+
 The provider is resolved per request and **degrades gracefully**: if it is
 unconfigured, over the point cap, or the API call fails, travel falls back to
 haversine and the active provider is reported in the optimize response and on the

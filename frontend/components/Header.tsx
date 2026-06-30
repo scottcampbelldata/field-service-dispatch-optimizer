@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { RoutingSettings } from "@/components/RoutingSettings";
 
 const LINKS = [
   { href: "/", label: "Board" },
@@ -53,13 +54,13 @@ export function Header() {
         </nav>
 
         <div className="ml-auto text-xs flex items-center gap-2" style={{ color: "var(--muted)" }}>
+          <RoutingSettings />
           <span
-            className="px-2 py-1 rounded-md mono"
+            className="px-2 py-1 rounded-md mono hidden md:inline"
             style={{ background: "var(--panel)", border: "1px solid var(--border)" }}
           >
             OR-Tools CP-SAT
           </span>
-          <span className="hidden sm:inline">synthetic data</span>
         </div>
       </div>
     </header>

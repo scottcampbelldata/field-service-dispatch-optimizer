@@ -30,7 +30,7 @@ const PRESETS: Preset[] = [
 const SOLVE = 6;
 
 export default function ScenariosPage() {
-  const { workload } = useDispatch();
+  const { workload, routing } = useDispatch();
   const maxTechs = workload?.technicians.length ?? 12;
 
   const [nominal, setNominal] = useState<OptimizeResult | null>(null);
@@ -45,8 +45,8 @@ export default function ScenariosPage() {
       const nominalParams: OptimizeParams = { ...DEFAULT_PARAMS, max_solve_seconds: SOLVE };
       const scenarioParams: OptimizeParams = { ...nominalParams, ...p.apply(maxTechs) };
       const [nom, scn] = await Promise.all([
-        nominal ? Promise.resolve(nominal) : optimize(nominalParams),
-        optimize(scenarioParams),
+        nominal ? Promise.resolve(nominal) : optimize(nominalParams, routing),
+        optimize(scenarioParams, routing),
       ]);
       setNominal(nom);
       setScenario(scn);
