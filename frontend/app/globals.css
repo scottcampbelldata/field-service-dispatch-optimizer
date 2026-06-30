@@ -70,6 +70,17 @@ input[type="range"] { accent-color: var(--accent); }
   background: var(--panel); color: var(--foreground); border-color: var(--border);
 }
 .leaflet-bar a:hover { background: var(--panel-2); }
+.leaflet-control-layers {
+  background: var(--panel); color: var(--foreground);
+  border: 1px solid var(--border); border-radius: 0.5rem;
+  box-shadow: 0 6px 18px rgba(0,0,0,.4);
+}
+.leaflet-control-layers-toggle {
+  background-color: var(--panel);
+  filter: invert(1) hue-rotate(180deg) brightness(1.2);
+}
+.leaflet-control-layers-expanded { padding: 8px 10px; font-size: 12px; }
+.leaflet-control-layers label { display: flex; align-items: center; gap: 6px; margin: 2px 0; }
 
 /* popup content layout */
 .map-pop { min-width: 168px; }
