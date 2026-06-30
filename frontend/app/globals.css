@@ -180,6 +180,7 @@ input[type="range"] { accent-color: var(--accent); }
   border: 1px solid #06121f; box-shadow: 0 0 4px rgba(0,0,0,.5);
   transition: transform .1s ease;
 }
+.route-stop.multi { width: auto; min-width: 20px; padding: 0 5px; border-radius: 10px; }
 .route-stop-wrap:hover .route-stop { transform: scale(1.25); z-index: 500; }
 
 /* marker cluster bubbles (dark theme) */
