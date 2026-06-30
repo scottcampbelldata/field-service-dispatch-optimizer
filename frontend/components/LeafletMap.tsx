@@ -84,6 +84,39 @@ function stopPopup(s: Route["stops"][number], techName: string, color: string): 
   </div>`;
 }
 
+// One marker for several jobs serviced at the same site: header names the
+// site + stop count, then one line per job (sequence, id, skill, window).
+function multiStopPopup(stops: Route["stops"], techName: string, color: string): string {
+  const lines = stops.map((s) => {
+    const flags = [
+      s.is_sla_breach ? '<span class="badge-em">SLA</span>' : "",
+      s.is_overtime ? '<span class="badge-em" style="background:var(--warn)">OT</span>' : "",
+    ].join(" ");
+    return `<div class="row"><span>Stop ${s.seq + 1} · #${esc(s.job_id)} · ${esc(s.required_skill)}</span>` +
+      `<b>${hhmm(s.start)}-${hhmm(s.end)} ${flags}</b></div>`;
+  }).join("");
+  return `<div class="map-pop">
+    <div class="map-pop-h">
+      <span class="dot" style="background:${color}"></span> ${esc(stops[0].site_name)} · ${stops.length} stops
+    </div>
+    ${row("Technician", esc(techName))}
+    ${lines}
+  </div>`;
+}
+
+// Compress a sorted-ascending list of stop numbers into ranges: [1,2,3,5] -> "1-3,5".
+function formatSeqRange(nums: number[]): string {
+  const xs = [...nums].sort((a, b) => a - b);
+  const parts: string[] = [];
+  let start = xs[0], prev = xs[0];
+  for (let i = 1; i <= xs.length; i++) {
+    if (i < xs.length && xs[i] === prev + 1) { prev = xs[i]; continue; }
+    parts.push(start === prev ? `${start}` : `${start}-${prev}`);
+    if (i < xs.length) { start = xs[i]; prev = xs[i]; }
+  }
+  return parts.join(",");
+}
+
 // Coordinates are [lon=x, lat=y]; Leaflet wants [lat, lon].
 export default function LeafletMap({ technicians, jobs, routes }: Props) {
   const elRef = useRef<HTMLDivElement>(null);
@@ -230,34 +263,29 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
 
       if (!dim) {
         // Several jobs can sit at the same site (up to 8 in this dataset), so
-        // multiple stops share one coordinate. Fan co-located stops around the
-        // point via icon anchor so each numbered marker stays visible and
-        // clickable; the anchor keeps them tied to the true location.
-        const coLocTotal = new Map<string, number>();
+        // multiple stops share one coordinate. Stacked markers overlap and
+        // hide each other, so collapse co-located stops into a single marker
+        // that shows the whole visit sequence (e.g. "1-2") and lists every job
+        // in its popup. One location => one marker => nothing can be hidden.
+        const groups = new Map<string, Route["stops"]>();
         rt.stops.forEach((s) => {
           const k = `${s.x},${s.y}`;
-          coLocTotal.set(k, (coLocTotal.get(k) ?? 0) + 1);
+          (groups.get(k) ?? groups.set(k, []).get(k)!).push(s);
         });
-        const coLocSeen = new Map<string, number>();
-        rt.stops.forEach((s) => {
-          const k = `${s.x},${s.y}`;
-          const total = coLocTotal.get(k) ?? 1;
-          const idx = coLocSeen.get(k) ?? 0;
-          coLocSeen.set(k, idx + 1);
-          let anchor: [number, number] = [10, 10];
-          if (total > 1) {
-            const ang = (2 * Math.PI * idx) / total - Math.PI / 2;
-            const r = 11;
-            anchor = [10 - r * Math.cos(ang), 10 - r * Math.sin(ang)];
-          }
+        groups.forEach((group) => {
+          const ordered = [...group].sort((a, b) => a.seq - b.seq);
+          const first = ordered[0];
+          const multi = ordered.length > 1;
+          const label = formatSeqRange(ordered.map((s) => s.seq + 1));
           const icon = L.divIcon({
             className: "route-stop-wrap",
-            html: `<div class="route-stop" style="background:${color}">${s.seq + 1}</div>`,
-            iconSize: [20, 20], iconAnchor: anchor,
+            html: `<div class="route-stop${multi ? " multi" : ""}" style="background:${color}">${label}</div>`,
+            iconSize: [20, 20], iconAnchor: [10, 10],
           });
-          const m = L.marker([s.y, s.x], { icon, pane: "stopPane" }).addTo(layer);
-          m.bindTooltip(`#${s.job_id} · stop ${s.seq + 1}`, { direction: "top" });
-          m.bindPopup(stopPopup(s, rt.tech_name, color));
+          const m = L.marker([first.y, first.x], { icon, pane: "stopPane" }).addTo(layer);
+          m.bindTooltip(multi ? `${ordered.length} stops · ${first.site_name}` : `#${first.job_id} · stop ${label}`,
+            { direction: "top" });
+          m.bindPopup(multi ? multiStopPopup(ordered, rt.tech_name, color) : stopPopup(first, rt.tech_name, color));
         });
         if (isSel || selected === null) pts.forEach((p) => bounds.push(p));
       }
