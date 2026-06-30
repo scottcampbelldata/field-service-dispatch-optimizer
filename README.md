@@ -1,7 +1,6 @@
 # Field Service Dispatch Optimizer
 
-<!-- Set OWNER to your GitHub user/org once the repo is pushed so the CI badge resolves. -->
-[![CI](https://github.com/OWNER/field-service-dispatch-optimizer/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/field-service-dispatch-optimizer/actions/workflows/ci.yml)
+[![CI](https://github.com/scottcampbelldata/field-service-dispatch-optimizer/actions/workflows/ci.yml/badge.svg)](https://github.com/scottcampbelldata/field-service-dispatch-optimizer/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.12-3776AB?logo=python&logoColor=white)
 ![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs)
 ![Solver](https://img.shields.io/badge/solver-OR--Tools%20CP--SAT-22d3ee)
