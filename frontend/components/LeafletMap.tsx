@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { Route } from "@/lib/api";
 import { PRIORITY_LABEL, hhmm, priorityColor } from "@/lib/format";
 
@@ -54,6 +56,7 @@ function techPopup(t: MapTech, stops?: number): string {
     ${t.skills?.length ? row("Skills", esc(t.skills.join(", "))) : ""}
     ${row("Shift", shift)}
     ${stops != null ? row("Jobs on route", String(stops)) : ""}
+    ${stops != null ? '<div class="map-pop-hint">click route to isolate</div>' : ""}
   </div>`;
 }
 
@@ -83,12 +86,15 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const LRef = useRef<any>(null);
   const [ready, setReady] = useState(false);
+  const [selected, setSelected] = useState<number | null>(null);
 
   useEffect(() => {
     let active = true;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let ro: any;
-    import("leaflet").then(({ default: L }) => {
+    (async () => {
+      const L = (await import("leaflet")).default;
+      await import("leaflet.markercluster");
       if (!active || !elRef.current || mapRef.current) return;
       const map = L.map(elRef.current, { zoomControl: true });
       L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
@@ -104,7 +110,7 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
       ro.observe(elRef.current);
       setTimeout(() => active && map.invalidateSize(), 120);
       setReady(true);
-    });
+    })();
     return () => {
       active = false;
       if (ro) ro.disconnect();
@@ -122,71 +128,101 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
 
     layer.clearLayers();
     const bounds: [number, number][] = [];
+    const hasRoutes = !!routes?.length;
 
-    // hover emphasis helpers
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const hoverable = (m: any, baseR: number) => {
-      m.on("mouseover", () => m.setRadius(baseR + 3));
-      m.on("mouseout", () => m.setRadius(baseR));
-      return m;
-    };
+    // --- standalone jobs (board): clustered ---
+    if (jobs?.length && !hasRoutes) {
+      const cluster = L.markerClusterGroup({
+        showCoverageOnHover: false,
+        maxClusterRadius: 45,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        iconCreateFunction: (c: any) => L.divIcon({
+          className: "",
+          html: `<div class="cluster">${c.getChildCount()}</div>`,
+          iconSize: [34, 34],
+        }),
+      });
+      jobs.forEach((j) => {
+        const r = j.priority === 1 ? 6 : j.priority === 2 ? 5 : 4;
+        const color = priorityColor(j.priority);
+        const m = L.circleMarker([j.y, j.x], {
+          radius: r, color: j.is_emergency ? "#ffffff" : color,
+          weight: j.is_emergency ? 2 : 1, fillColor: color, fillOpacity: 0.8,
+        });
+        m.bindTooltip(`#${j.id ?? ""} · ${j.required_skill ?? ""}`, { direction: "top" });
+        m.bindPopup(jobPopup(j));
+        m.on("mouseover", () => m.setRadius(r + 3));
+        m.on("mouseout", () => m.setRadius(r));
+        cluster.addLayer(m);
+        bounds.push([j.y, j.x]);
+      });
+      layer.addLayer(cluster);
+    }
 
-    jobs?.forEach((j) => {
-      const r = j.priority === 1 ? 6 : j.priority === 2 ? 5 : 4;
-      const color = priorityColor(j.priority);
-      const m = L.circleMarker([j.y, j.x], {
-        radius: r, color: j.is_emergency ? "#ffffff" : color,
-        weight: j.is_emergency ? 2 : 1, fillColor: color, fillOpacity: 0.75,
-      }).addTo(layer);
-      m.bindTooltip(`#${j.id ?? ""} · ${j.required_skill ?? ""}`, { direction: "top" });
-      m.bindPopup(jobPopup(j));
-      hoverable(m, r);
-      bounds.push([j.y, j.x]);
-    });
-
+    // --- routes: polylines + numbered stops, with click-to-isolate ---
     routes?.forEach((rt, i) => {
       const color = `hsl(${ROUTE_HUES[i % ROUTE_HUES.length]} 80% 60%)`;
+      const isSel = selected === rt.tech_id;
+      const dim = selected !== null && !isSel;
+
       const pts: [number, number][] = [
         [rt.home_y, rt.home_x],
         ...rt.stops.map((s) => [s.y, s.x] as [number, number]),
         [rt.home_y, rt.home_x],
       ];
-      L.polyline(pts, { color, weight: 2, opacity: 0.85 }).addTo(layer);
-      rt.stops.forEach((s) => {
-        const m = L.circleMarker([s.y, s.x], {
-          radius: 4, color, weight: 1, fillColor: color, fillOpacity: 0.95,
-        }).addTo(layer);
-        m.bindTooltip(`#${s.job_id} · stop ${s.seq + 1}`, { direction: "top" });
-        m.bindPopup(stopPopup(s, rt.tech_name, color));
-        hoverable(m, 4);
-        bounds.push([s.y, s.x]);
-      });
-      bounds.push([rt.home_y, rt.home_x]);
+      const line = L.polyline(pts, {
+        color, weight: isSel ? 4 : 2, opacity: dim ? 0.1 : 0.85,
+      }).addTo(layer);
+      line.on("click", () => setSelected((p) => (p === rt.tech_id ? null : rt.tech_id)));
+
+      if (!dim) {
+        rt.stops.forEach((s) => {
+          const icon = L.divIcon({
+            className: "route-stop-wrap",
+            html: `<div class="route-stop" style="background:${color}">${s.seq + 1}</div>`,
+            iconSize: [20, 20], iconAnchor: [10, 10],
+          });
+          const m = L.marker([s.y, s.x], { icon }).addTo(layer);
+          m.bindTooltip(`#${s.job_id} · stop ${s.seq + 1}`, { direction: "top" });
+          m.bindPopup(stopPopup(s, rt.tech_name, color));
+        });
+        if (isSel || selected === null) pts.forEach((p) => bounds.push(p));
+      }
     });
 
+    // --- technician home bases (always shown) ---
     const stopsByTech = new Map<string, number>();
     routes?.forEach((rt) => stopsByTech.set(rt.tech_name, rt.stops.length));
-
     technicians.forEach((t) => {
       const icon = L.divIcon({
         className: "",
         html: '<div style="width:12px;height:12px;background:var(--accent);transform:rotate(45deg);border:1px solid #06121f;box-shadow:0 0 5px rgba(0,0,0,.6)"></div>',
-        iconSize: [12, 12],
-        iconAnchor: [6, 6],
+        iconSize: [12, 12], iconAnchor: [6, 6],
       });
       const m = L.marker([t.home_y, t.home_x], { icon }).addTo(layer);
       m.bindTooltip(t.name, { direction: "top" });
       m.bindPopup(techPopup(t, stopsByTech.get(t.name)));
-      bounds.push([t.home_y, t.home_x]);
+      if (!hasRoutes || selected === null) bounds.push([t.home_y, t.home_x]);
     });
 
-    if (bounds.length) map.fitBounds(bounds, { padding: [24, 24], maxZoom: 13 });
-  }, [ready, technicians, jobs, routes]);
+    if (bounds.length) map.fitBounds(bounds, { padding: [28, 28], maxZoom: 14 });
+  }, [ready, technicians, jobs, routes, selected]);
+
+  const showClear = selected !== null && !!routes?.length;
 
   return (
     <div className="relative w-full h-full">
       <div ref={elRef} className="absolute inset-0 rounded-md overflow-hidden"
         style={{ background: "var(--panel-2)" }} />
+
+      {showClear && (
+        <button onClick={() => setSelected(null)}
+          className="absolute z-[600] right-2 top-2 rounded-md px-2.5 py-1 text-xs font-medium"
+          style={{ background: "var(--accent)", color: "#06202b" }}>
+          Show all routes
+        </button>
+      )}
+
       <div className="absolute z-[500] left-2 bottom-2 rounded-md px-2.5 py-2 text-[11px] space-y-1"
         style={{ background: "rgba(13,20,34,0.85)", border: "1px solid var(--border)", color: "var(--muted)" }}>
         <LegendRow color="#f43f5e" label="P1 critical" />
@@ -197,10 +233,9 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
           <span style={{ width: 9, height: 9, background: "var(--accent)", transform: "rotate(45deg)", display: "inline-block" }} />
           tech base
         </div>
-        <div className="flex items-center gap-1.5">
-          <span style={{ width: 9, height: 9, borderRadius: 999, border: "2px solid #fff", display: "inline-block" }} />
-          emergency
-        </div>
+        {!!routes?.length && (
+          <div className="pt-1" style={{ color: "var(--accent)" }}>click a route to isolate</div>
+        )}
       </div>
     </div>
   );
