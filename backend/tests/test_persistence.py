@@ -13,7 +13,7 @@ from backend.optimizer.transform import transform
 
 def _apply_views(engine):
     raw = _VIEWS_SQL.read_text(encoding="utf-8")
-    code = "\n".join(l for l in raw.splitlines() if not l.strip().startswith("--"))
+    code = "\n".join(line for line in raw.splitlines() if not line.strip().startswith("--"))
     with engine.begin() as conn:
         for stmt in [s.strip() for s in code.split(";") if s.strip()]:
             conn.execute(sa.text(stmt))

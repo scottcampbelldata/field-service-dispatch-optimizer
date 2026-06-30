@@ -15,11 +15,11 @@ from pathlib import Path
 # Allow running as a standalone script.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from backend.app import repository  # noqa: E402
 from backend.app.config import settings  # noqa: E402
 from backend.app.db import engine, init_db  # noqa: E402
 from backend.app.generator import build_base_instance  # noqa: E402
 from backend.app.models import Base  # noqa: E402
-from backend.app import repository  # noqa: E402
 
 
 def main() -> None:

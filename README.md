@@ -1,5 +1,13 @@
 # Field Service Dispatch Optimizer
 
+<!-- Set OWNER to your GitHub user/org once the repo is pushed so the CI badge resolves. -->
+[![CI](https://github.com/OWNER/field-service-dispatch-optimizer/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/field-service-dispatch-optimizer/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/python-3.12-3776AB?logo=python&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs)
+![Solver](https://img.shields.io/badge/solver-OR--Tools%20CP--SAT-22d3ee)
+![Tests](https://img.shields.io/badge/tests-61%20passing-34d399)
+![License](https://img.shields.io/badge/license-MIT-64748b)
+
 A live operations-planning system that assigns technicians to service jobs under
 real constraints — skills, travel, shift length, SLA deadlines, priority, job
 duration, overtime, and parts — then compares an **OR-Tools CP-SAT optimized
@@ -169,12 +177,18 @@ docs/          architecture, optimization-model, data-dictionary, case-study
 deploy/        systemd units, nginx, runbook
 ```
 
-## Testing
+## Testing & CI
 
 ```bash
-./tasks.ps1 test     # or: make test
+pytest -q                       # 61 tests
+ruff check backend data-generator   # lint
 ```
 
 Covers travel math, domain invariants, the greedy baseline, the CP-SAT model
-(including "optimized never loses to baseline"), the parameter transforms,
-metrics, generator determinism, persistence + SQL views, and the API endpoints.
+(including "optimized never loses to baseline" and optimality-gap reporting), the
+parameter transforms, metrics, the cost model, capacity sweep, generator
+determinism, persistence + SQL views, routing providers, and the API endpoints.
+
+**GitHub Actions** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs
+ruff + pytest on the backend and a type-checked Next.js build on the frontend for
+every push and pull request to `main`.

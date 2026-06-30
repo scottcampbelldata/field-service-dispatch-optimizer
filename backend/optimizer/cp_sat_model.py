@@ -25,7 +25,6 @@ import time
 from ortools.sat.python import cp_model
 
 from .baseline import plan_baseline
-from .metrics import compute_objective
 from .domain import (
     ASSIGNED,
     UNASSIGNED_CAPACITY,
@@ -36,6 +35,7 @@ from .domain import (
     TechnicianDC,
     static_unassigned_reason,
 )
+from .metrics import compute_objective
 
 DEFAULT_MAX_CANDIDATES = 14
 
