@@ -32,13 +32,13 @@ def default_user_params() -> dict:
 
 
 def _resolve_weights(goal: str, strictness: str) -> dict:
-    w = {"w_completed": 100, "w_travel": 1, "w_sla": 250, "w_overtime": 3}
+    w = {"w_completed": 300, "w_travel": 1, "w_sla": 250, "w_overtime": 3}
     if goal == "max_jobs":
-        w["w_completed"] = 150
+        w["w_completed"] = 450
     elif goal == "min_travel":
-        w["w_travel"] = 4
+        w["w_travel"] = 6
     elif goal == "protect_sla":
-        w["w_sla"] = 500
+        w["w_sla"] = 600
     if strictness == "lenient":
         w["w_sla"] = max(50, w["w_sla"] // 2)
     elif strictness == "strict":
