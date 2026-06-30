@@ -249,7 +249,7 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
       )}
 
       <div className="absolute z-[500] left-2 bottom-2 rounded-md px-2.5 py-2 text-[11px] space-y-1"
-        style={{ background: "rgba(13,20,34,0.85)", border: "1px solid var(--border)", color: "var(--muted)" }}>
+        style={{ background: "color-mix(in srgb, var(--surface-1) 90%, transparent)", border: "1px solid var(--border)", color: "var(--text-muted)", backdropFilter: "blur(4px)" }}>
         <LegendRow color="#f43f5e" label="P1 critical" />
         <LegendRow color="#f59e0b" label="P2 high" />
         <LegendRow color="#38bdf8" label="P3 normal" />
