@@ -65,11 +65,23 @@ export interface OptimizeResult {
   baseline: { run_id: number; metrics: Metrics; utilization: Utilization[] };
   optimized: {
     run_id: number; metrics: Metrics; utilization: Utilization[];
-    routes: Route[]; unassigned: Stop[];
+    routes: Route[]; unassigned: Stop[]; optimality_gap: number | null;
   };
   comparison: Comparison;
   diagnostics: Diagnostics;
   routing: { provider: string };
+  cost?: CostImpact;
+}
+
+export interface CostBreakdown {
+  sla: number; overtime: number; travel: number; unassigned: number; total: number;
+}
+export interface CostImpact {
+  baseline: CostBreakdown;
+  optimized: CostBreakdown;
+  savings_per_day: number;
+  savings_per_year: number;
+  rates: { sla_breach: number; overtime_hour: number; travel_hour: number; unassigned_job: number };
 }
 
 export interface OptimizeParams {

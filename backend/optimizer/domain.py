@@ -181,6 +181,9 @@ class Plan:
     solve_seconds: float
     status: str
     objective: float
+    # Relative gap to CP-SAT's proven objective bound, as a percentage
+    # (0.0 == proven optimal). None when not applicable (baseline / no solver).
+    optimality_gap: Optional[float] = None
 
     def assigned(self) -> list[Assignment]:
         return [a for a in self.assignments if a.assigned]

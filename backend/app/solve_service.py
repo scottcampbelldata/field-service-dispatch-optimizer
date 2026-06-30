@@ -8,8 +8,10 @@ import uuid
 from dataclasses import replace
 
 from backend.app import repository, routing, serialize
+from backend.app.config import settings
 from backend.app.db import SessionLocal
 from backend.optimizer.baseline import plan_baseline
+from backend.optimizer.cost import CostRates, cost_impact
 from backend.optimizer.cp_sat_model import plan_optimized
 from backend.optimizer.metrics import compare, plan_diagnostics, plan_metrics
 
@@ -56,8 +58,19 @@ def optimize(params: dict, routing_override: dict | None = None) -> dict:
             "utilization": opt_util,
             "routes": serialize.routes(inst, optimized),
             "unassigned": serialize.unassigned(inst, optimized),
+            "optimality_gap": optimized.optimality_gap,
         },
         "comparison": compare(base_metrics, opt_metrics),
         "diagnostics": plan_diagnostics(inst, optimized),
         "routing": {"provider": routing_label},
+        "cost": cost_impact(base_metrics, opt_metrics, _cost_rates(), settings.cost_work_days),
     }
+
+
+def _cost_rates() -> CostRates:
+    return CostRates(
+        sla_breach=settings.cost_sla_breach_usd,
+        overtime_hour=settings.cost_overtime_hour_usd,
+        travel_hour=settings.cost_travel_hour_usd,
+        unassigned_job=settings.cost_unassigned_job_usd,
+    )

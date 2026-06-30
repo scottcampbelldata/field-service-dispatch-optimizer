@@ -36,8 +36,12 @@ export default function ResultsPage() {
         <h1 className="text-2xl font-semibold">Optimizer results</h1>
         <p className="text-sm mt-1" style={{ color: "var(--muted)" }}>
           Recommended assignment and route order — {routes.length} technicians dispatched,
-          solver {result.optimized.metrics.solve_status} in {result.optimized.metrics.solve_seconds}s ·
-          travel via {result.routing.provider}.
+          solver {result.optimized.metrics.solve_status} in {result.optimized.metrics.solve_seconds}s
+          {result.optimized.optimality_gap != null && (
+            <> · {result.optimized.optimality_gap === 0
+              ? "proven optimal"
+              : `within ${result.optimized.optimality_gap}% of optimal`}</>
+          )} · travel via {result.routing.provider}.
         </p>
       </div>
 

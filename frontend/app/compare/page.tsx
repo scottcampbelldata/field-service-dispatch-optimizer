@@ -5,8 +5,66 @@ import { BeforeAfterChart, UtilizationChart } from "@/components/Charts";
 import { MetricCard } from "@/components/MetricCard";
 import MapView from "@/components/MapView";
 import { useDispatch } from "@/app/providers";
-import { Metrics, Comparison } from "@/lib/api";
+import { CostImpact, Metrics, Comparison } from "@/lib/api";
 import { REASON_LABEL, hhmm } from "@/lib/format";
+
+const usd = (n: number) => `$${Math.round(n).toLocaleString()}`;
+
+function CostImpactPanel({ cost }: { cost: CostImpact }) {
+  const rows: { label: string; b: number; o: number }[] = [
+    { label: "SLA penalties", b: cost.baseline.sla, o: cost.optimized.sla },
+    { label: "Overtime", b: cost.baseline.overtime, o: cost.optimized.overtime },
+    { label: "Travel", b: cost.baseline.travel, o: cost.optimized.travel },
+    { label: "Unfinished work", b: cost.baseline.unassigned, o: cost.optimized.unassigned },
+  ];
+  return (
+    <div className="panel p-5">
+      <div className="flex flex-wrap items-baseline justify-between gap-2 mb-4">
+        <h2 className="font-semibold">Estimated cost impact</h2>
+        <div className="text-right">
+          <div className="text-2xl font-semibold mono" style={{ color: "var(--good)" }}>
+            {usd(cost.savings_per_day)}/day saved
+          </div>
+          <div className="text-xs" style={{ color: "var(--muted)" }}>
+            ≈ {usd(cost.savings_per_year)}/year · vs manual dispatch
+          </div>
+        </div>
+      </div>
+      <table className="w-full text-sm">
+        <thead style={{ color: "var(--muted)" }}>
+          <tr>
+            <th className="text-left font-medium pb-2">Daily cost</th>
+            <th className="text-right font-medium pb-2">Manual</th>
+            <th className="text-right font-medium pb-2">Optimized</th>
+            <th className="text-right font-medium pb-2">Saved</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.label} className="border-t" style={{ borderColor: "var(--border)" }}>
+              <td className="py-2">{r.label}</td>
+              <td className="py-2 text-right mono" style={{ color: "var(--muted)" }}>{usd(r.b)}</td>
+              <td className="py-2 text-right mono">{usd(r.o)}</td>
+              <td className="py-2 text-right mono" style={{ color: r.b - r.o > 0 ? "var(--good)" : "var(--muted)" }}>
+                {usd(r.b - r.o)}
+              </td>
+            </tr>
+          ))}
+          <tr className="border-t" style={{ borderColor: "var(--border)" }}>
+            <td className="py-2 font-semibold">Total</td>
+            <td className="py-2 text-right mono font-semibold" style={{ color: "var(--muted)" }}>{usd(cost.baseline.total)}</td>
+            <td className="py-2 text-right mono font-semibold">{usd(cost.optimized.total)}</td>
+            <td className="py-2 text-right mono font-semibold" style={{ color: "var(--good)" }}>{usd(cost.savings_per_day)}</td>
+          </tr>
+        </tbody>
+      </table>
+      <p className="text-xs mt-3" style={{ color: "var(--muted)" }}>
+        Illustrative rates: {usd(cost.rates.sla_breach)}/breach · {usd(cost.rates.overtime_hour)}/OT-hr ·
+        {" "}{usd(cost.rates.travel_hour)}/travel-hr · {usd(cost.rates.unassigned_job)}/unfinished job.
+      </p>
+    </div>
+  );
+}
 
 export default function ComparePage() {
   const { result, loading, runOptimize } = useDispatch();
@@ -49,9 +107,14 @@ export default function ComparePage() {
           </p>
         </div>
         <div className="text-xs mono" style={{ color: "var(--muted)" }}>
-          solver {o.solve_status} · {o.solve_seconds}s · batch {result.batch_id}
+          solver {o.solve_status} · {o.solve_seconds}s
+          {result.optimized.optimality_gap != null && (
+            <> · {result.optimized.optimality_gap === 0 ? "proven optimal" : `${result.optimized.optimality_gap}% gap`}</>
+          )} · batch {result.batch_id}
         </div>
       </div>
+
+      {result.cost && <CostImpactPanel cost={result.cost} />}
 
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
         <MetricCard label="Jobs completed" value={o.jobs_completed} delta={c.jobs_completed_delta} />

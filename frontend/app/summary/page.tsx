@@ -20,11 +20,14 @@ export default function SummaryPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
         <Kpi label="Jobs completed" value={`${o.jobs_completed}/${o.jobs_total}`} />
         <Kpi label="SLA breaches" value={`${o.sla_breaches}`} />
         <Kpi label="P1 protection" value={`${o.high_priority_rate}%`} />
         <Kpi label="Overtime" value={`${o.overtime_hours}h`} />
+        {result.cost && (
+          <Kpi label="Est. annual savings" value={`$${Math.round(result.cost.savings_per_year).toLocaleString()}`} />
+        )}
       </div>
 
       <div className="panel p-6 space-y-5">
@@ -116,7 +119,12 @@ function buildBrief(r: OptimizeResult) {
     `${c.travel_hours_delta <= 0 ? `${-c.travel_hours_delta}h less travel` : `${c.travel_hours_delta}h more travel`}, and ` +
     `${c.overtime_hours_delta <= 0 ? `${-c.overtime_hours_delta}h less overtime` : `${c.overtime_hours_delta}h more overtime`} — the same people and trucks, planned better.`;
 
-  return { headline, recommendations, bottomLine };
+  const costLine = r.cost
+    ? ` At the modeled rates that is about $${Math.round(r.cost.savings_per_day).toLocaleString()} per day` +
+      ` (≈ $${Math.round(r.cost.savings_per_year).toLocaleString()} per year) in avoided cost.`
+    : "";
+
+  return { headline, recommendations, bottomLine: bottomLine + costLine };
 }
 
 function Kpi({ label, value }: { label: string; value: string }) {
