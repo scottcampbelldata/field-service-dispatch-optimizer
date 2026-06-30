@@ -23,6 +23,8 @@ interface Props {
 }
 
 const ROUTE_HUES = [180, 150, 95, 45, 20, 320, 265, 210, 120, 0, 60, 290];
+// Distinct from the teal job-clusters and the red/amber/blue/grey job dots.
+const TECH_COLOR = "#8b5cf6";
 const esc = (s: unknown) => String(s ?? "").replace(/[&<>"]/g, (c) =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c] as string));
 
@@ -51,7 +53,7 @@ function techPopup(t: MapTech, stops?: number): string {
     ? `${hhmm(t.shift_start)}-${hhmm(t.shift_end)}` : "-";
   return `<div class="map-pop">
     <div class="map-pop-h">
-      <span class="dot" style="background:var(--accent)"></span> ${esc(t.name)}
+      <span class="dot" style="background:${TECH_COLOR}"></span> ${esc(t.name)}
     </div>
     ${t.skills?.length ? row("Skills", esc(t.skills.join(", "))) : ""}
     ${row("Shift", shift)}
@@ -128,6 +130,13 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
       ).addTo(map);
 
       map.setView([32.85, -96.75], 11);
+
+      // Dedicated high-z pane so technician bases always sit above job markers
+      // and clusters (their home bases share coordinates with job sites, so
+      // otherwise they get covered, especially when zoomed in).
+      const techPane = map.createPane("techPane");
+      techPane.style.zIndex = "650";
+
       mapRef.current = map;
       layerRef.current = L.layerGroup().addTo(map);
       LRef.current = L;
@@ -221,10 +230,10 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
     technicians.forEach((t) => {
       const icon = L.divIcon({
         className: "",
-        html: '<div style="width:12px;height:12px;background:var(--accent);transform:rotate(45deg);border:1px solid #06121f;box-shadow:0 0 5px rgba(0,0,0,.6)"></div>',
-        iconSize: [12, 12], iconAnchor: [6, 6],
+        html: `<div style="width:16px;height:16px;background:${TECH_COLOR};transform:rotate(45deg);border:2px solid #fff;box-shadow:0 0 5px rgba(0,0,0,.55)"></div>`,
+        iconSize: [16, 16], iconAnchor: [8, 8],
       });
-      const m = L.marker([t.home_y, t.home_x], { icon }).addTo(layer);
+      const m = L.marker([t.home_y, t.home_x], { icon, pane: "techPane", riseOnHover: true }).addTo(layer);
       m.bindTooltip(t.name, { direction: "top" });
       m.bindPopup(techPopup(t, stopsByTech.get(t.name)));
       if (!hasRoutes || selected === null) bounds.push([t.home_y, t.home_x]);
@@ -255,7 +264,7 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
         <LegendRow color="#38bdf8" label="P3 normal" />
         <LegendRow color="#94a3b8" label="P4 low" />
         <div className="flex items-center gap-1.5">
-          <span style={{ width: 9, height: 9, background: "var(--accent)", transform: "rotate(45deg)", display: "inline-block" }} />
+          <span style={{ width: 10, height: 10, background: TECH_COLOR, transform: "rotate(45deg)", display: "inline-block", border: "1px solid #fff" }} />
           tech base
         </div>
         {!!routes?.length && (
