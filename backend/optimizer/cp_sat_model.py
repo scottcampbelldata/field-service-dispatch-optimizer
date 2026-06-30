@@ -25,6 +25,7 @@ import time
 from ortools.sat.python import cp_model
 
 from .baseline import plan_baseline
+from .metrics import compute_objective
 from .domain import (
     ASSIGNED,
     UNASSIGNED_CAPACITY,
@@ -37,7 +38,7 @@ from .domain import (
 )
 from .travel import travel_minutes
 
-DEFAULT_MAX_CANDIDATES = 18
+DEFAULT_MAX_CANDIDATES = 14
 
 
 def _horizon(tech: TechnicianDC, overtime_allowed: bool) -> int:
@@ -130,6 +131,14 @@ def plan_optimized(
         if vs:
             model.Add(sum(vs) <= 1)
 
+    # Throughput floor: complete at least as many jobs as the (feasible) warm
+    # start. This makes throughput lexicographically dominant — the optimizer
+    # can never finish fewer jobs than the manual baseline — while leaving the
+    # objective weights free to cut breaches, travel, and overtime above it.
+    baseline_completed = len(warm.assigned())
+    if visit and baseline_completed > 0:
+        model.Add(sum(visit.values()) >= baseline_completed)
+
     # Per-technician routing circuit + travel sequencing.
     travel_terms = []
     arc_vars: dict[tuple[int, int, int], cp_model.IntVar] = {}   # (tech, i, k) -> lit
@@ -193,20 +202,33 @@ def plan_optimized(
     solver = cp_model.CpSolver()
     solver.parameters.max_time_in_seconds = float(max_seconds)
     solver.parameters.num_search_workers = 8
+    solver.parameters.random_seed = 42
     status = solver.Solve(model)
     elapsed = time.perf_counter() - start_wall
 
     has_solution = status in (cp_model.OPTIMAL, cp_model.FEASIBLE)
     assignments = _extract(instance, solver, visit, starts, has_solution)
-    objective = solver.ObjectiveValue() if has_solution else 0.0
 
-    return Plan(
+    opt_plan = Plan(
         plan_type="optimized",
         assignments=tuple(assignments),
         solve_seconds=elapsed,
         status=solver.StatusName(status),
-        objective=objective,
+        objective=compute_objective(instance, Plan("optimized", tuple(assignments), elapsed, "", 0.0)),
     )
+
+    # Safety net: an anytime solver can return a weak incumbent on a short
+    # solve. The warm-start baseline is always feasible, so never return
+    # anything worse than it — guarantees optimized >= baseline in every case.
+    if not has_solution or compute_objective(instance, opt_plan) < compute_objective(instance, warm):
+        return Plan(
+            plan_type="optimized",
+            assignments=warm.assignments,
+            solve_seconds=elapsed,
+            status="warm_start_fallback",
+            objective=compute_objective(instance, warm),
+        )
+    return opt_plan
 
 
 def _hint_from_baseline(model, instance, warm, visit, starts, arc_vars, depot_loop, node_jobs_by_tech):

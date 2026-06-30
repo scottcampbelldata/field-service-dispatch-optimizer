@@ -41,6 +41,20 @@ export interface Comparison {
   jobs_completed_delta: number; sla_breaches_delta: number; travel_hours_delta: number;
   overtime_hours_delta: number; unassigned_delta: number; objective_delta: number;
 }
+export interface SkillDemand {
+  skill: string; certified_techs: number; jobs: number;
+  completed: number; unassigned: number; breaches: number; demand_minutes: number;
+}
+export interface Diagnostics {
+  unassigned_by_reason: { reason: string; count: number }[];
+  skill_demand: SkillDemand[];
+  parts_blocked: number;
+  emergency_count: number;
+  bottleneck_skill: string | null;
+  total_capacity_minutes: number;
+  total_demand_minutes: number;
+}
+
 export interface OptimizeResult {
   batch_id: string;
   params: OptimizeParams;
@@ -50,6 +64,7 @@ export interface OptimizeResult {
     routes: Route[]; unassigned: Stop[];
   };
   comparison: Comparison;
+  diagnostics: Diagnostics;
 }
 
 export interface OptimizeParams {

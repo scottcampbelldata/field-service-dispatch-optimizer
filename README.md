@@ -26,6 +26,18 @@ limited people, time, travel, skills, and SLA risk, what should we do next?
 ### Baseline vs Optimized — the decision, quantified
 ![Baseline vs Optimized](screenshots/baseline-vs-optimized.png)
 
+### Optimizer Results — recommended routes and timing
+![Optimizer Results](screenshots/optimizer-results.png)
+
+### Constraint Explorer — why each decision was made
+![Constraint Explorer](screenshots/constraint-explorer.png)
+
+### Scenario Simulator — inject chaos and re-solve
+![Scenario Simulator](screenshots/scenario-simulator.png)
+
+### Executive Summary — the plan in management language
+![Executive Summary](screenshots/executive-summary.png)
+
 ## The killer comparison
 
 Same technicians, same jobs, same constraints — only the planning differs
@@ -112,7 +124,7 @@ backend/
   sql/         portable analytical views
   tests/       optimizer, generator, persistence, and API tests
 data-generator/  CLI to seed the database
-frontend/      Next.js dashboard (/ board, /compare)
+frontend/      Next.js dashboard: / board, /results, /compare, /constraints, /scenarios, /summary
 docs/          architecture, optimization-model, data-dictionary, case-study
 deploy/        systemd units, nginx, runbook
 ```

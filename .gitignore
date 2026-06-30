@@ -24,3 +24,6 @@ Thumbs.db
 
 # Playwright MCP artifacts
 frontend/.playwright-mcp/
+
+# Playwright MCP artifacts (root)
+.playwright-mcp/

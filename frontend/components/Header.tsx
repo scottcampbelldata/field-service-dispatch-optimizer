@@ -4,15 +4,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const LINKS = [
-  { href: "/", label: "Dispatch Board" },
-  { href: "/compare", label: "Baseline vs Optimized" },
+  { href: "/", label: "Board" },
+  { href: "/results", label: "Results" },
+  { href: "/compare", label: "Compare" },
+  { href: "/constraints", label: "Constraints" },
+  { href: "/scenarios", label: "Scenarios" },
+  { href: "/summary", label: "Summary" },
 ];
 
 export function Header() {
   const path = usePathname();
   return (
     <header className="border-b" style={{ borderColor: "var(--border)" }}>
-      <div className="mx-auto max-w-7xl px-5 py-3 flex items-center gap-6">
+      <div className="mx-auto max-w-7xl px-5 py-3 flex flex-wrap items-center gap-x-6 gap-y-2">
         <div className="flex items-center gap-3">
           <div
             className="h-8 w-8 rounded-md grid place-items-center font-bold"
