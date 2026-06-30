@@ -69,6 +69,7 @@ export interface OptimizeResult {
   };
   comparison: Comparison;
   diagnostics: Diagnostics;
+  routing: { provider: string };
 }
 
 export interface OptimizeParams {
