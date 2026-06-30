@@ -134,8 +134,11 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
       // Dedicated high-z pane so technician bases always sit above job markers
       // and clusters (their home bases share coordinates with job sites, so
       // otherwise they get covered, especially when zoomed in).
+      // Above job markers (markerPane 600) and clusters, but below Leaflet's
+      // tooltipPane (650) and popupPane (700) so popups/tooltips never hide
+      // behind a technician diamond.
       const techPane = map.createPane("techPane");
-      techPane.style.zIndex = "650";
+      techPane.style.zIndex = "620";
 
       mapRef.current = map;
       layerRef.current = L.layerGroup().addTo(map);
@@ -169,6 +172,8 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
       const cluster = L.markerClusterGroup({
         showCoverageOnHover: false,
         maxClusterRadius: 45,
+        spiderfyDistanceMultiplier: 1.6,
+        spiderLegPolylineOptions: { weight: 1, color: "var(--text-faint)", opacity: 0.35 },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         iconCreateFunction: (c: any) => L.divIcon({
           className: "",
