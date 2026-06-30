@@ -22,6 +22,7 @@ from backend.optimizer.domain import (
     SiteDC,
     TechnicianDC,
 )
+from backend.optimizer.travel import make_euclidean_provider
 
 HVAC = 1
 ELEC = 2
@@ -71,4 +72,7 @@ def make_instance(techs, jobs, *, params=None):
         jobs=tuple(jobs),
         skills=SKILLS,
         params=params or Params(),
+        # Euclidean grid travel keeps these hand-built instances predictable
+        # (the production default is haversine over real lat/long).
+        travel_provider=make_euclidean_provider(1.0),
     )

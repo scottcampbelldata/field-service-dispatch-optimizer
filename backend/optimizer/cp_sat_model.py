@@ -36,7 +36,6 @@ from .domain import (
     TechnicianDC,
     static_unassigned_reason,
 )
-from .travel import travel_minutes
 
 DEFAULT_MAX_CANDIDATES = 14
 
@@ -70,8 +69,7 @@ def _select_candidates(instance, warm, max_candidates) -> dict[int, list[int]]:
             if _can_attempt(instance, tech, j, p.overtime_allowed)
         ]
         feasible.sort(
-            key=lambda j: travel_minutes(tech.home_x, tech.home_y, j.x, j.y,
-                                         p.speed_factor, p.traffic_multiplier)
+            key=lambda j: instance.travel(tech.home_x, tech.home_y, j.x, j.y)
         )
         by_tech[tech.id].update(j.id for j in feasible[:max_candidates])
 
@@ -178,7 +176,7 @@ def plan_optimized(
                 arcs.append((i, k, lit))
                 ax, ay = coords(i)
                 bx, by = coords(k)
-                t_ik = travel_minutes(ax, ay, bx, by, p.speed_factor, p.traffic_multiplier)
+                t_ik = instance.travel(ax, ay, bx, by)
                 if t_ik:
                     travel_terms.append(t_ik * lit)
                 if k != 0:

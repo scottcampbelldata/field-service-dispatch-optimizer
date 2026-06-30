@@ -14,6 +14,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field, replace
 from typing import Optional
 
+from .travel import haversine_minutes
+
 # Reason codes attached to every job after planning.
 ASSIGNED = "assigned"
 UNASSIGNED_NO_SKILL = "unassigned_no_skill"
@@ -104,6 +106,21 @@ class Instance:
     jobs: tuple[JobDC, ...]
     skills: tuple[Skill, ...]
     params: Params = field(default_factory=Params)
+    # Pluggable base-travel provider (lon, lat, lon, lat) -> base minutes.
+    # None => great-circle haversine using params.speed_factor. A real
+    # road-routing provider is injected by the I/O layer. Excluded from
+    # equality/repr so instances stay comparable in tests.
+    travel_provider: Optional[object] = field(default=None, compare=False, repr=False)
+
+    def base_travel(self, ax: float, ay: float, bx: float, by: float) -> int:
+        """One-way travel minutes without the traffic multiplier."""
+        if self.travel_provider is not None:
+            return self.travel_provider(ax, ay, bx, by)
+        return haversine_minutes(ax, ay, bx, by, self.params.speed_factor)
+
+    def travel(self, ax: float, ay: float, bx: float, by: float) -> int:
+        """Effective one-way travel minutes including the traffic multiplier."""
+        return int(round(self.base_travel(ax, ay, bx, by) * self.params.traffic_multiplier))
 
     def tech(self, tech_id: int) -> TechnicianDC:
         return self._tech_index[tech_id]

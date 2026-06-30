@@ -21,7 +21,6 @@ from .domain import (
     Plan,
     static_unassigned_reason,
 )
-from .travel import travel_minutes
 
 
 @dataclass
@@ -97,12 +96,11 @@ def plan_baseline(instance: Instance) -> Plan:
 
 def _best_tech(instance: Instance, job: JobDC, routes: dict[int, _Route]):
     """Nearest qualified technician who can fit the job. Returns (tech_id, start, end)."""
-    p = instance.params
     best = None
     best_travel = None
     for tech in instance.certified_techs(job.required_skill):
         route = routes[tech.id]
-        leg = travel_minutes(route.pos_x, route.pos_y, job.x, job.y, p.speed_factor, p.traffic_multiplier)
+        leg = instance.travel(route.pos_x, route.pos_y, job.x, job.y)
         start = route.clock + leg
         end = start + job.duration
         if end > route.horizon:

@@ -10,12 +10,10 @@ from __future__ import annotations
 from collections import defaultdict
 
 from .domain import Instance, Plan
-from .travel import travel_minutes
 
 
 def _route_travel_minutes(instance: Instance, plan: Plan) -> int:
     """Total travel minutes across all routes (home -> jobs -> home)."""
-    p = instance.params
     total = 0
     for tech in instance.technicians:
         route = plan.for_tech(tech.id)
@@ -24,10 +22,10 @@ def _route_travel_minutes(instance: Instance, plan: Plan) -> int:
         px, py = tech.home_x, tech.home_y
         for a in route:
             job = instance.job(a.job_id)
-            total += travel_minutes(px, py, job.x, job.y, p.speed_factor, p.traffic_multiplier)
+            total += instance.travel(px, py, job.x, job.y)
             px, py = job.x, job.y
         # return to home base
-        total += travel_minutes(px, py, tech.home_x, tech.home_y, p.speed_factor, p.traffic_multiplier)
+        total += instance.travel(px, py, tech.home_x, tech.home_y)
     return total
 
 
