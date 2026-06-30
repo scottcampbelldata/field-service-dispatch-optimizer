@@ -29,6 +29,8 @@ export default function ConstraintsPage() {
         </p>
       </div>
 
+      <ModelConstraints />
+
       <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
         <div className="panel p-5 space-y-4">
           <h2 className="font-semibold">Capacity vs demand</h2>
@@ -126,6 +128,48 @@ export default function ConstraintsPage() {
             })}
           </tbody>
         </table>
+      </div>
+    </div>
+  );
+}
+
+const MODEL_RULES: { name: string; kind: "Hard" | "Soft" | "Objective"; detail: string }[] = [
+  { name: "Skill + certification match", kind: "Hard", detail: "A job is only assignable to a technician certified in its required skill." },
+  { name: "Parts availability", kind: "Hard", detail: "Jobs needing an out-of-stock part cannot be scheduled today." },
+  { name: "Shift window + overtime cap", kind: "Hard", detail: "Each job must finish within the technician's shift, or within the overtime cap when overtime is allowed." },
+  { name: "Travel-time sequencing", kind: "Hard", detail: "Consecutive stops on a route respect door-to-door travel time (haversine or real road)." },
+  { name: "Throughput floor", kind: "Hard", detail: "The optimized plan must complete at least as many jobs as the manual baseline." },
+  { name: "SLA windows", kind: "Soft", detail: "Finishing after the SLA deadline is penalized; under Strict mode, P1 deadlines become hard constraints." },
+  { name: "Priority-weighted completion", kind: "Objective", detail: "Higher-priority jobs earn more reward, so the solver protects critical work first." },
+  { name: "Travel / overtime penalties", kind: "Objective", detail: "Travel minutes and overtime minutes are costs the solver minimizes (scaled by the traffic slider)." },
+];
+
+function ModelConstraints() {
+  const tone = (k: string) =>
+    k === "Hard" ? "var(--bad)" : k === "Soft" ? "var(--warn)" : "var(--accent)";
+  return (
+    <div className="panel p-5">
+      <div className="flex items-baseline justify-between mb-1">
+        <h2 className="font-semibold">Constraints in the model</h2>
+        <span className="text-xs" style={{ color: "var(--muted)" }}>
+          Hard = never violated · Soft = penalized · Objective = optimized
+        </span>
+      </div>
+      <p className="text-sm mb-4" style={{ color: "var(--muted)" }}>
+        The exact rules the CP-SAT solver enforces when building every plan.
+      </p>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {MODEL_RULES.map((r) => (
+          <div key={r.name} className="flex gap-3">
+            <span className="chip shrink-0" style={{ color: tone(r.kind), borderColor: tone(r.kind) }}>
+              {r.kind}
+            </span>
+            <div>
+              <div className="text-sm font-medium">{r.name}</div>
+              <div className="text-xs" style={{ color: "var(--muted)" }}>{r.detail}</div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

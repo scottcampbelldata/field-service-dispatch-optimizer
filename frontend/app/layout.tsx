@@ -38,6 +38,18 @@ export default function RootLayout({
           <DispatchProvider>
             <Header />
             <main className="flex-1">{children}</main>
+            <footer className="border-t mt-8" style={{ borderColor: "var(--border)" }}>
+              <div className="mx-auto max-w-7xl px-5 py-4 text-xs flex flex-wrap items-center justify-between gap-2"
+                style={{ color: "var(--muted)" }}>
+                <span>
+                  Synthetic Dallas-Fort Worth field-service dataset - no real customer data.
+                </span>
+                <span>
+                  OR-Tools CP-SAT optimization · technicians, skills, SLA windows, travel, and shift
+                  capacity are seeded and reproducible.
+                </span>
+              </div>
+            </footer>
           </DispatchProvider>
         </ThemeProvider>
       </body>

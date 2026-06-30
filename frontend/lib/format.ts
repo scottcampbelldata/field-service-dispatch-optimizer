@@ -29,3 +29,15 @@ export function signed(n: number, suffix = ""): string {
   const s = n > 0 ? `+${n}` : `${n}`;
   return `${s}${suffix}`;
 }
+
+/** Plain-English, skill-aware explanation for why a job was not assigned. */
+export function deferralReason(reason: string, skill?: string): string {
+  const s = skill ? `${skill} ` : "";
+  switch (reason) {
+    case "unassigned_no_skill": return `No certified ${skill ?? "qualified"} technician on shift`;
+    case "unassigned_no_part": return "Required part not in stock";
+    case "unassigned_shift": return `No ${s}capacity left within shift + overtime`;
+    case "unassigned_capacity": return "Deferred to protect higher-priority SLAs";
+    default: return REASON_LABEL[reason] ?? reason;
+  }
+}

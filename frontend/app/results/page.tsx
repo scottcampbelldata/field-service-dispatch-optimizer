@@ -5,7 +5,7 @@ import { EmptyState } from "@/components/EmptyState";
 import MapView from "@/components/MapView";
 import { useDispatch } from "@/app/providers";
 import { Route, Stop } from "@/lib/api";
-import { hhmm, priorityColor } from "@/lib/format";
+import { deferralReason, hhmm, priorityColor } from "@/lib/format";
 
 export default function ResultsPage() {
   const { result, workload } = useDispatch();
@@ -197,9 +197,11 @@ function UnassignedTable() {
           <tbody>
             {rows.map((s) => (
               <tr key={s.job_id} className="border-t" style={{ borderColor: "var(--border)" }}>
-                <td className="px-4 py-2 mono">#{s.job_id}</td>
-                <td className="px-4 py-2">{s.required_skill}</td>
-                <td className="px-4 py-2">{s.site_name}</td>
+                <td className="px-4 py-2 mono align-top">#{s.job_id}</td>
+                <td className="px-4 py-2 align-top">{s.required_skill}</td>
+                <td className="px-4 py-2 text-xs align-top" style={{ color: "var(--muted)" }}>
+                  {deferralReason(s.reason, s.required_skill)}
+                </td>
               </tr>
             ))}
           </tbody>
