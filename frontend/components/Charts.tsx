@@ -20,7 +20,7 @@ interface BarRow {
   unit?: string;
 }
 
-/** Before/after as small multiples — one mini chart per metric, each on its own
+/** Before/after as small multiples - one mini chart per metric, each on its own
  *  scale (metrics have very different magnitudes, so a shared axis would lie). */
 export function BeforeAfterChart({ rows }: { rows: BarRow[] }) {
   return (

@@ -2,7 +2,7 @@
 
 Sweeps technician count (optionally with overtime on and off) through the
 optimizer and reports how the optimized plan's KPIs respond, so the app can
-answer "should we hire another technician, or just allow overtime — and where do
+answer "should we hire another technician, or just allow overtime - and where do
 returns flatten?" Reuses the optimizer and metrics; nothing is persisted.
 """
 
@@ -36,8 +36,8 @@ def marginal_value(series: list[dict]) -> tuple[list[dict], int | None]:
 
     Reports jobs gained and overtime-hours saved by each added technician.
     (Raw SLA-breach count is intentionally not used here: it is conditional on
-    completion — finishing more jobs can raise the absolute breach count even as
-    service improves — so it is a misleading marginal metric.)
+    completion - finishing more jobs can raise the absolute breach count even as
+    service improves - so it is a misleading marginal metric.)
     Returns (marginal_rows, diminishing_at) where diminishing_at is the first
     technician count whose marginal job gain drops below 1.
     """
@@ -91,7 +91,7 @@ def _narrative(on_series: list[dict], off_series: list[dict], diminishing_at: in
     ]
     if diminishing_at is not None:
         parts.append(
-            f"Returns flatten beyond {diminishing_at} technicians — each additional "
+            f"Returns flatten beyond {diminishing_at} technicians - each additional "
             f"hire then adds less than one job."
         )
     else:
@@ -104,12 +104,12 @@ def _narrative(on_series: list[dict], off_series: list[dict], diminishing_at: in
             if dj > 0:
                 parts.append(
                     f"At {top} technicians, allowing overtime adds about {dj} more jobs at "
-                    f"the cost of {hi['overtime_hours']} overtime hours — the trade-off against "
+                    f"the cost of {hi['overtime_hours']} overtime hours - the trade-off against "
                     f"another hire."
                 )
             else:
                 parts.append(
-                    f"At {top} technicians, overtime no longer adds jobs — the crew already "
+                    f"At {top} technicians, overtime no longer adds jobs - the crew already "
                     f"clears the feasible work, so hiring beats paying overtime here."
                 )
     return " ".join(parts)

@@ -44,7 +44,7 @@ def health() -> dict:
 def system() -> dict:
     inst = repository.load_base()
     return {
-        "name": "Atlas Field Services — Dispatch Optimizer",
+        "name": "Atlas Field Services - Dispatch Optimizer",
         "solver": "Google OR-Tools CP-SAT",
         "seed": settings.seed,
         "technicians": len(inst.technicians),

@@ -31,7 +31,7 @@ function row(label: string, value: string) {
 }
 
 function jobPopup(j: MapJob): string {
-  const part = j.requires_part ? (j.part_available ? "in stock" : "missing") : "—";
+  const part = j.requires_part ? (j.part_available ? "in stock" : "missing") : "-";
   return `<div class="map-pop">
     <div class="map-pop-h">
       <span class="dot" style="background:${priorityColor(j.priority)}"></span>
@@ -48,7 +48,7 @@ function jobPopup(j: MapJob): string {
 
 function techPopup(t: MapTech, stops?: number): string {
   const shift = t.shift_start != null && t.shift_end != null
-    ? `${hhmm(t.shift_start)}–${hhmm(t.shift_end)}` : "—";
+    ? `${hhmm(t.shift_start)}-${hhmm(t.shift_end)}` : "-";
   return `<div class="map-pop">
     <div class="map-pop-h">
       <span class="dot" style="background:var(--accent)"></span> ${esc(t.name)}
@@ -72,7 +72,7 @@ function stopPopup(s: Route["stops"][number], techName: string, color: string): 
     ${row("Technician", esc(techName))}
     ${row("Skill", esc(s.required_skill))}
     ${row("Site", esc(s.site_name))}
-    ${row("Window", `${hhmm(s.start)}–${hhmm(s.end)}`)}
+    ${row("Window", `${hhmm(s.start)}-${hhmm(s.end)}`)}
   </div>`;
 }
 

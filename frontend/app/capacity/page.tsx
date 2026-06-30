@@ -38,7 +38,7 @@ export default function CapacityPage() {
       <div>
         <h1 className="text-2xl font-semibold">Marginal value of capacity</h1>
         <p className="text-sm mt-1" style={{ color: "var(--muted)" }}>
-          Sweep crew size through the optimizer to see the decision frontier — what each added
+          Sweep crew size through the optimizer to see the decision frontier - what each added
           technician is worth, and whether overtime substitutes for hiring. Uses your current
           scenario settings from the Dispatch Board.
         </p>
@@ -105,14 +105,14 @@ export default function CapacityPage() {
                 lines={[{ key: "otOn", name: "Overtime allowed", color: ON }]} />
               <p className="text-xs mt-2" style={{ color: "var(--muted)" }}>
                 Overtime substitutes for crew: the optimizer spends more of it as a larger team
-                completes more work. Weigh these hours against the cost of another hire — the gap
+                completes more work. Weigh these hours against the cost of another hire - the gap
                 between the two job lines is what overtime buys.
               </p>
             </div>
           </div>
 
           <div className="panel p-5">
-            <h2 className="font-semibold mb-3">Marginal value — jobs gained per added technician</h2>
+            <h2 className="font-semibold mb-3">Marginal value - jobs gained per added technician</h2>
             <MarginalBarChart data={marginalData} />
           </div>
 

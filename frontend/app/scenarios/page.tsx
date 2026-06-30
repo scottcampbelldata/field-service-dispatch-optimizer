@@ -21,7 +21,7 @@ const PRESETS: Preset[] = [
     apply: () => ({ traffic_penalty: 2.0 }) },
   { key: "hvac", label: "HVAC shortage", blurb: "Only one HVAC-certified tech",
     apply: () => ({ skill_shortage: "HVAC" }) },
-  { key: "sla", label: "Tighten SLAs", blurb: "Strict — P1 deadlines become hard",
+  { key: "sla", label: "Tighten SLAs", blurb: "Strict - P1 deadlines become hard",
     apply: () => ({ sla_strictness: "strict" }) },
   { key: "noot", label: "Overtime disabled", blurb: "No overtime allowed",
     apply: () => ({ overtime_allowed: false }) },
@@ -65,7 +65,7 @@ export default function ScenariosPage() {
         <p className="text-sm mt-1" style={{ color: "var(--muted)" }}>
           Inject realistic disruption and re-solve. Each card compares the optimized plan
           <span className="mono"> under the scenario</span> against the optimized plan on a
-          normal day — so you can see what the disruption actually costs.
+          normal day - so you can see what the disruption actually costs.
         </p>
       </div>
 

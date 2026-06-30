@@ -9,7 +9,7 @@ export function EmptyState({ title }: { title: string }) {
     <div className="mx-auto max-w-2xl p-10 text-center space-y-4">
       <h2 className="text-xl font-semibold">{title}</h2>
       <p style={{ color: "var(--muted)" }}>
-        Run the optimizer first — set a scenario on the Dispatch Board, or solve with
+        Run the optimizer first - set a scenario on the Dispatch Board, or solve with
         the current defaults right here.
       </p>
       <div className="flex gap-3 justify-center">
