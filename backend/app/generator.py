@@ -1,12 +1,15 @@
 """Seeded synthetic data generator for Atlas Field Services.
 
 Produces one canonical, reproducible "day" as a domain ``Instance``: a roster of
-technicians, a set of customer sites on a grid, and a backlog of service jobs.
-Same seed => identical instance. The backlog is deliberately larger than the
-crews can fully complete, so there is a real planning problem (and a visible
-gap between the naive baseline and the optimizer).
+technicians, a set of customer sites at real lat/long across a metro service
+region, and a backlog of service jobs. Same seed => identical instance. The
+backlog is deliberately larger than the crews can fully complete, so there is a
+real planning problem (and a visible gap between the naive baseline and the
+optimizer).
 
-No proprietary or employer data is used.
+Coordinates are real (Dallas–Fort Worth metro) so the map and a real routing
+engine work, but the sites, technicians, and jobs themselves are entirely
+synthetic. No proprietary or employer data is used.
 """
 
 from __future__ import annotations
@@ -22,9 +25,13 @@ from backend.optimizer.domain import (
     TechnicianDC,
 )
 
-REGION = 100.0
+# Metro service region (Dallas–Fort Worth). x = longitude, y = latitude.
+METRO_NAME = "Dallas–Fort Worth"
+LON_MIN, LON_MAX = -96.95, -96.55
+LAT_MIN, LAT_MAX = 32.70, 33.00
+CENTER = ((LON_MIN + LON_MAX) / 2, (LAT_MIN + LAT_MAX) / 2)
+
 SKILL_NAMES = ["HVAC", "Electrical", "Plumbing", "Refrigeration", "Controls", "General"]
-ZONES = ["Downtown", "North", "South", "East", "West", "Industrial Park"]
 
 DEFAULT_SEED = 42
 DEFAULT_TECHS = 12
@@ -50,9 +57,10 @@ def build_base_instance(
     technicians = _build_technicians(rng, n_techs, sites, skill_ids)
     jobs = _build_jobs(rng, n_jobs, sites, skill_ids)
 
-    # speed_factor 0.4 => the ~140-unit diagonal costs ~56 travel minutes,
-    # making a full day's backlog realistically over-subscribed.
-    params = Params(speed_factor=0.4)
+    # speed_factor 1.2 min/km ≈ 50 km/h door-to-door; the metro diagonal costs
+    # ~60 travel minutes, making a full day's backlog realistically
+    # over-subscribed so the optimizer has room to beat the baseline.
+    params = Params(speed_factor=1.2)
     return Instance(
         technicians=tuple(technicians),
         sites=tuple(sites),
@@ -65,16 +73,22 @@ def build_base_instance(
 def _build_sites(rng: random.Random, n: int) -> list[SiteDC]:
     sites = []
     for i in range(1, n + 1):
+        lon = round(rng.uniform(LON_MIN, LON_MAX), 5)
+        lat = round(rng.uniform(LAT_MIN, LAT_MAX), 5)
         sites.append(
-            SiteDC(
-                id=i,
-                name=f"Site {i:02d}",
-                x=round(rng.uniform(0, REGION), 1),
-                y=round(rng.uniform(0, REGION), 1),
-                zone=ZONES[i % len(ZONES)],
-            )
+            SiteDC(id=i, name=f"Site {i:02d}", x=lon, y=lat, zone=_zone_for(lon, lat))
         )
     return sites
+
+
+def _zone_for(lon: float, lat: float) -> str:
+    """Business-readable zone label from position (cosmetic)."""
+    cx, cy = CENTER
+    if abs(lon - cx) < 0.07 and abs(lat - cy) < 0.05:
+        return "Downtown"
+    ns = "North" if lat >= cy else "South"
+    ew = "East" if lon >= cx else "West"
+    return f"{ns} {ew}"
 
 
 def _build_technicians(rng, n, sites, skill_ids) -> list[TechnicianDC]:

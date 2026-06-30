@@ -14,8 +14,12 @@ export interface Job {
   required_skill: string; priority: number; sla_deadline: number; duration: number;
   requires_part: boolean; part_available: boolean; is_emergency: boolean;
 }
+export interface Region {
+  name: string; center: [number, number];   // [lon, lat]
+  lon_min: number; lon_max: number; lat_min: number; lat_max: number;
+}
 export interface Workload {
-  technicians: Technician[]; sites: Site[]; jobs: Job[]; skills: Skill[]; region: number;
+  technicians: Technician[]; sites: Site[]; jobs: Job[]; skills: Skill[]; region: Region;
 }
 
 export interface Metrics {
@@ -88,7 +92,7 @@ export const DEFAULT_PARAMS: OptimizeParams = {
   sla_strictness: "normal",
   overtime_allowed: true,
   optimization_goal: "balanced",
-  max_solve_seconds: 8,
+  max_solve_seconds: 12,
 };
 
 async function get<T>(path: string): Promise<T> {
