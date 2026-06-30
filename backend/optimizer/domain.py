@@ -82,8 +82,11 @@ class Params:
     sla_strictness: str = "normal"     # 'lenient' | 'normal' | 'strict'
     optimization_goal: str = "balanced"
     max_solve_seconds: float = 8.0
-    # objective weights (all integer so CP-SAT stays integral)
-    w_completed: int = 100             # base reward per completed job
+    # objective weights (all integer so CP-SAT stays integral).
+    # w_completed dominates so completing work is paramount; the lowest-priority
+    # reward (w_completed * 1) still exceeds an SLA breach, so the optimizer
+    # improves quality without sacrificing throughput.
+    w_completed: int = 300             # base reward per completed job
     w_travel: int = 1                  # penalty per travel minute
     w_sla: int = 250                   # penalty per SLA breach
     w_overtime: int = 3                # penalty per overtime minute
