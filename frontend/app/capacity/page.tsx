@@ -1,11 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChartLegend, FrontierChart, Series } from "@/components/FrontierChart";
+import { MarginalBarChart, ThemedLineChart } from "@/components/CapacityCharts";
 import { useDispatch } from "@/app/providers";
 import { CapacityPoint, CapacityResult, DEFAULT_SWEEP, SweepConfig, capacitySweep } from "@/lib/api";
 
-const ON = "var(--accent)";
+const ON = "#22d3ee";
 const OFF = "#94a3b8";
 
 export default function CapacityPage() {
@@ -31,7 +31,7 @@ export default function CapacityPage() {
     }
   }
 
-  const { xs, jobsSeries, overtimeSeries } = useMemo(() => buildSeries(result), [result]);
+  const { lineData, marginalData, hasOff } = useMemo(() => buildChartData(result), [result]);
 
   return (
     <div className="mx-auto max-w-6xl p-5 space-y-5">
@@ -92,18 +92,17 @@ export default function CapacityPage() {
         <>
           <div className="grid gap-5 lg:grid-cols-2">
             <div className="panel p-5">
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="font-semibold">Jobs completed vs crew size</h2>
-                <ChartLegend series={legend(cfg.include_overtime_off)} />
-              </div>
-              <FrontierChart xValues={xs} series={jobsSeries} yLabel="Jobs" />
+              <h2 className="font-semibold mb-2">Jobs completed vs crew size</h2>
+              <ThemedLineChart data={lineData} xKey="techs" yLabel="Jobs"
+                lines={[
+                  { key: "jobsOn", name: "Overtime allowed", color: ON },
+                  ...(hasOff ? [{ key: "jobsOff", name: "No overtime", color: OFF }] : []),
+                ]} />
             </div>
             <div className="panel p-5">
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="font-semibold">Overtime hours vs crew size</h2>
-                <ChartLegend series={[{ label: "Overtime allowed", color: ON }]} />
-              </div>
-              <FrontierChart xValues={xs} series={overtimeSeries} yLabel="OT hours" />
+              <h2 className="font-semibold mb-2">Overtime hours vs crew size</h2>
+              <ThemedLineChart data={lineData} xKey="techs" yLabel="OT hours"
+                lines={[{ key: "otOn", name: "Overtime allowed", color: ON }]} />
               <p className="text-xs mt-2" style={{ color: "var(--muted)" }}>
                 Overtime substitutes for crew: the optimizer spends more of it as a larger team
                 completes more work. Weigh these hours against the cost of another hire — the gap
@@ -114,7 +113,7 @@ export default function CapacityPage() {
 
           <div className="panel p-5">
             <h2 className="font-semibold mb-3">Marginal value — jobs gained per added technician</h2>
-            <MarginalBars result={result} />
+            <MarginalBarChart data={marginalData} />
           </div>
 
           <div className="panel p-5">
@@ -134,55 +133,24 @@ export default function CapacityPage() {
   );
 }
 
-function MarginalBars({ result }: { result: CapacityResult }) {
-  const max = Math.max(1, ...result.marginal.map((m) => Math.abs(m.delta_jobs)));
-  return (
-    <div className="space-y-2">
-      {result.marginal.map((m) => (
-        <div key={m.technician_count} className="flex items-center gap-3 text-sm">
-          <span className="w-28" style={{ color: "var(--muted)" }}>
-            +1 tech → {m.technician_count}
-          </span>
-          <div className="flex-1 h-5 rounded" style={{ background: "var(--panel-2)" }}>
-            <div className="h-5 rounded flex items-center justify-end pr-2"
-              style={{ width: `${Math.max((m.delta_jobs / max) * 100, 4)}%`, background: m.delta_jobs > 0 ? "var(--good)" : "var(--muted)" }}>
-              <span className="text-xs mono" style={{ color: "#06202b" }}>+{m.delta_jobs}</span>
-            </div>
-          </div>
-          <span className="w-28 text-right text-xs mono" style={{ color: m.delta_overtime < 0 ? "var(--good)" : "var(--muted)" }}>
-            {m.delta_overtime <= 0 ? "" : "+"}{m.delta_overtime}h overtime
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function buildSeries(result: CapacityResult | null) {
-  if (!result) return { xs: [] as number[], jobsSeries: [] as Series[], overtimeSeries: [] as Series[] };
-  const xs = result.technician_counts;
+function buildChartData(result: CapacityResult | null) {
+  if (!result) return { lineData: [], marginalData: [], hasOff: false };
   const on = new Map<number, CapacityPoint>();
   const off = new Map<number, CapacityPoint>();
   result.points.forEach((p) => (p.overtime_allowed ? on : off).set(p.technician_count, p));
   const hasOff = off.size > 0;
-  const twoSeries = (pick: (p: CapacityPoint) => number): Series[] => {
-    const s: Series[] = [
-      { label: "Overtime allowed", color: ON, values: xs.map((c) => (on.has(c) ? pick(on.get(c)!) : null)) },
-    ];
-    if (hasOff) s.push({ label: "No overtime", color: OFF, values: xs.map((c) => (off.has(c) ? pick(off.get(c)!) : null)) });
-    return s;
-  };
-  // Overtime only applies to the overtime-allowed plan (off series is ~0).
-  const overtimeSeries: Series[] = [
-    { label: "Overtime allowed", color: ON, values: xs.map((c) => (on.has(c) ? on.get(c)!.overtime_hours : null)) },
-  ];
-  return { xs, jobsSeries: twoSeries((p) => p.jobs_completed), overtimeSeries };
-}
-
-function legend(hasOff: boolean) {
-  const l = [{ label: "Overtime allowed", color: ON }];
-  if (hasOff) l.push({ label: "No overtime", color: OFF });
-  return l;
+  const lineData = result.technician_counts.map((c) => ({
+    techs: c,
+    jobsOn: on.get(c)?.jobs_completed ?? null,
+    jobsOff: off.get(c)?.jobs_completed ?? null,
+    otOn: on.get(c)?.overtime_hours ?? null,
+  }));
+  const marginalData = result.marginal.map((m) => ({
+    label: `→ ${m.technician_count}`,
+    deltaJobs: m.delta_jobs,
+    deltaOvertime: m.delta_overtime,
+  }));
+  return { lineData, marginalData, hasOff };
 }
 
 const selStyle = { background: "var(--panel-2)", border: "1px solid var(--border)", color: "var(--foreground)" };
