@@ -27,6 +27,9 @@ limited people, time, travel, skills, and SLA risk, what should we do next?
 
 ## Screenshots
 
+### Light & dark — system-aware theming
+![Light mode](screenshots/light-mode.png)
+
 ### Dispatch Board — scenario controls, service region, backlog
 ![Dispatch Board](screenshots/dispatch-board.png)
 
@@ -159,8 +162,8 @@ ORS_API_KEY=your-key-here
 ## Tech stack
 
 Python 3.12 · OR-Tools (CP-SAT) · FastAPI · SQLAlchemy 2 · PostgreSQL / SQLite ·
-Next.js (App Router) + TypeScript · Leaflet · OpenRouteService / OSRM (optional) ·
-pytest.
+Next.js (App Router) + TypeScript · Recharts · Leaflet · next-themes (system
+light/dark) · OpenRouteService / OSRM (optional) · pytest · ruff · GitHub Actions.
 
 ## Project structure
 

@@ -41,7 +41,7 @@ export default function ConstraintsPage() {
               <div className="h-6 rounded flex items-center justify-end pr-2"
                 style={{ width: `${Math.min(capPct, 100)}%`,
                          background: capPct > 100 ? "var(--bad)" : "var(--accent)" }}>
-                <span className="text-xs mono" style={{ color: "#06202b" }}>
+                <span className="text-xs mono" style={{ color: "var(--accent-contrast)" }}>
                   {Math.round(d.total_demand_minutes / 60)}h / {Math.round(d.total_capacity_minutes / 60)}h
                 </span>
               </div>

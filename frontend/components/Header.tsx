@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { RoutingSettings } from "@/components/RoutingSettings";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const LINKS = [
   { href: "/", label: "Board" },
@@ -17,12 +18,12 @@ const LINKS = [
 export function Header() {
   const path = usePathname();
   return (
-    <header className="border-b" style={{ borderColor: "var(--border)" }}>
+    <header className="border-b sticky top-0 z-50" style={{ borderColor: "var(--border)", background: "color-mix(in srgb, var(--surface-1) 88%, transparent)", backdropFilter: "blur(8px)" }}>
       <div className="mx-auto max-w-7xl px-5 py-3 flex flex-wrap items-center gap-x-6 gap-y-2">
         <div className="flex items-center gap-3">
           <div
             className="h-8 w-8 rounded-md grid place-items-center font-bold"
-            style={{ background: "var(--accent)", color: "#06202b" }}
+            style={{ background: "var(--accent)", color: "var(--accent-contrast)" }}
           >
             A
           </div>
@@ -55,13 +56,14 @@ export function Header() {
         </nav>
 
         <div className="ml-auto text-xs flex items-center gap-2" style={{ color: "var(--muted)" }}>
-          <RoutingSettings />
           <span
-            className="px-2 py-1 rounded-md mono hidden md:inline"
-            style={{ background: "var(--panel)", border: "1px solid var(--border)" }}
+            className="px-2 py-1 rounded-md mono hidden lg:inline"
+            style={{ background: "var(--surface-2)", border: "1px solid var(--border)" }}
           >
             OR-Tools CP-SAT
           </span>
+          <RoutingSettings />
+          <ThemeToggle />
         </div>
       </div>
     </header>
