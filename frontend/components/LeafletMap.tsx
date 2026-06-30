@@ -39,6 +39,7 @@ function jobPopup(j: MapJob): string {
       <span class="dot" style="background:${priorityColor(j.priority)}"></span>
       Job #${esc(j.id)} ${j.is_emergency ? '<span class="badge-em">EMERGENCY</span>' : ""}
     </div>
+    ${row("Status", '<span style="color:var(--text-faint)">Unassigned</span>')}
     ${row("Site", esc(j.site_name))}
     ${row("Skill", esc(j.required_skill))}
     ${row("Priority", esc(PRIORITY_LABEL[j.priority] ?? j.priority))}
@@ -51,14 +52,19 @@ function jobPopup(j: MapJob): string {
 function techPopup(t: MapTech, stops?: number): string {
   const shift = t.shift_start != null && t.shift_end != null
     ? `${hhmm(t.shift_start)}-${hhmm(t.shift_end)}` : "-";
+  // No route attached => board/input view: this marker is just the crew's
+  // home base, nothing is assigned yet. Make that explicit so the diamond
+  // sitting amid a job cluster doesn't read as "this tech owns these calls".
+  const onBoard = stops == null;
   return `<div class="map-pop">
     <div class="map-pop-h">
-      <span class="dot" style="background:${TECH_COLOR}"></span> ${esc(t.name)}
+      <span class="dot" style="background:${TECH_COLOR}"></span> ${esc(t.name)}${onBoard ? " · Home base" : ""}
     </div>
     ${t.skills?.length ? row("Skills", esc(t.skills.join(", "))) : ""}
     ${row("Shift", shift)}
     ${stops != null ? row("Jobs on route", String(stops)) : ""}
     ${stops != null ? '<div class="map-pop-hint">click route to isolate</div>' : ""}
+    ${onBoard ? '<div class="map-pop-hint">Daily start/end location — not assigned work. Run the optimizer to assign jobs.</div>' : ""}
   </div>`;
 }
 
@@ -239,7 +245,7 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
         iconSize: [16, 16], iconAnchor: [8, 8],
       });
       const m = L.marker([t.home_y, t.home_x], { icon, pane: "techPane", riseOnHover: true }).addTo(layer);
-      m.bindTooltip(t.name, { direction: "top" });
+      m.bindTooltip(`${t.name}${hasRoutes ? "" : " · home base"}`, { direction: "top" });
       m.bindPopup(techPopup(t, stopsByTech.get(t.name)));
       if (!hasRoutes || selected === null) bounds.push([t.home_y, t.home_x]);
     });
@@ -268,12 +274,15 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
         <LegendRow color="#f59e0b" label="P2 high" />
         <LegendRow color="#38bdf8" label="P3 normal" />
         <LegendRow color="#94a3b8" label="P4 low" />
+        <div style={{ borderTop: "1px solid var(--border)", margin: "3px 0" }} />
         <div className="flex items-center gap-1.5">
           <span style={{ width: 10, height: 10, background: TECH_COLOR, transform: "rotate(45deg)", display: "inline-block", border: "1px solid #fff" }} />
-          tech base
+          tech home base
         </div>
-        {!!routes?.length && (
+        {routes?.length ? (
           <div className="pt-1" style={{ color: "var(--accent)" }}>click a route to isolate</div>
+        ) : (
+          <div className="pt-1" style={{ color: "var(--text-faint)" }}>backlog by site location · optimize to assign</div>
         )}
       </div>
     </div>
