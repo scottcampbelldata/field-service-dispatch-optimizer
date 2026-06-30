@@ -123,7 +123,7 @@ function Legend() {
   return (
     <div className="flex items-center gap-3 text-xs" style={{ color: "var(--muted)" }}>
       <span className="inline-flex items-center gap-1">
-        <span className="h-2 w-2 rotate-45 inline-block" style={{ background: "var(--accent)" }} /> tech base
+        <span className="h-2 w-2 rotate-45 inline-block" style={{ background: "var(--accent)" }} /> home base
       </span>
       <span className="inline-flex items-center gap-1">
         <span className="h-2 w-2 rounded-full inline-block" style={{ background: "#f43f5e" }} /> P1
