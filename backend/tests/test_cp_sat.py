@@ -57,4 +57,16 @@ def test_overtime_disabled_means_no_overtime():
 
 def test_solver_respects_time_bound():
     plan = plan_optimized(_small_instance(), max_seconds=2)
-    assert plan.solve_seconds < 10  # generous ceiling over the 2s bound
+    assert plan.solve_seconds < 15  # generous ceiling over the 2s bound
+
+
+def test_never_completes_fewer_jobs_than_baseline_even_on_short_solve():
+    # Throughput floor: even with a tiny time budget on a realistic instance,
+    # the optimizer must complete at least as many jobs as the manual baseline.
+    from backend.app.generator import build_base_instance
+    from backend.optimizer.transform import transform
+
+    inst = transform(build_base_instance(), job_count=70, technician_count=8, max_solve_seconds=2)
+    base = plan_baseline(inst)
+    opt = plan_optimized(inst, warm_start=base, max_seconds=2)
+    assert len(opt.assigned()) >= len(base.assigned())

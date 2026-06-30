@@ -3,8 +3,12 @@
 ```
                 ┌──────────────────────────────────────────────┐
                 │  Next.js frontend (App Router, TypeScript)     │
-                │  /         Dispatch Board (controls + map)     │
-                │  /compare  Baseline vs Optimized (money page)  │
+                │  /            Dispatch Board (controls + map)  │
+                │  /results     Optimizer Results (routes)       │
+                │  /compare     Baseline vs Optimized (money)    │
+                │  /constraints Constraint Explorer (why)        │
+                │  /scenarios   Scenario Simulator (chaos)       │
+                │  /summary     Executive Summary (narrative)    │
                 └───────────────┬──────────────────────────────┘
                                 │  fetch JSON
                                 ▼
@@ -40,7 +44,9 @@ and fully testable.
 - **Persistence** (`backend/app/`) mirrors master data into the database and
   stores every solve, so SQL views can report on real runs.
 - **API** (`backend/app/main.py`) is a thin orchestration layer.
-- **Frontend** (`frontend/`) is a two-page dashboard sharing one client context.
+- **Frontend** (`frontend/`) is a six-page dashboard sharing one client context:
+  Dispatch Board, Optimizer Results, Baseline vs Optimized, Constraint Explorer,
+  Scenario Simulator, and Executive Summary.
 
 ## Request flow for `POST /api/optimize`
 
