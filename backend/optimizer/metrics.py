@@ -97,6 +97,8 @@ def plan_metrics(instance: Instance, plan: Plan) -> dict:
         "jobs_completed": len(assigned),
         "jobs_total": len(instance.jobs),
         "sla_breaches": breaches,
+        "travel_minutes": travel_min,
+        "overtime_minutes": overtime_min,
         "travel_hours": round(travel_min / 60.0, 1),
         "overtime_hours": round(overtime_min / 60.0, 1),
         "unassigned": len(unassigned),
