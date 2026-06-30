@@ -8,7 +8,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
-from backend.app import repository, serialize, solve_service
+from backend.app import repository, routing, serialize, solve_service
 from backend.app.config import settings
 from backend.app.db import SessionLocal
 from backend.app.schemas import OptimizeRequest
@@ -52,6 +52,7 @@ def system() -> dict:
         "jobs": len(inst.jobs),
         "skills": [s.name for s in inst.skills],
         "synthetic": True,
+        "routing_provider": routing.configured_label(),
     }
 
 

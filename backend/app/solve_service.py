@@ -5,8 +5,9 @@ persist both runs -> read scorecards back from the analytical views.
 from __future__ import annotations
 
 import uuid
+from dataclasses import replace
 
-from backend.app import repository, serialize
+from backend.app import repository, routing, serialize
 from backend.app.db import SessionLocal
 from backend.optimizer.baseline import plan_baseline
 from backend.optimizer.cp_sat_model import plan_optimized
@@ -18,6 +19,12 @@ def optimize(params: dict) -> dict:
 
     base = repository.load_base()
     inst = transform(base, **params)
+
+    # Resolve the travel provider (real road routing if configured, else the
+    # Instance's built-in haversine). Both baseline and optimizer then use it.
+    travel_fn, routing_label = routing.build_travel_provider(inst)
+    if travel_fn is not None:
+        inst = replace(inst, travel_provider=travel_fn)
 
     baseline = plan_baseline(inst)
     optimized = plan_optimized(inst, warm_start=baseline)
@@ -51,4 +58,5 @@ def optimize(params: dict) -> dict:
         },
         "comparison": compare(base_metrics, opt_metrics),
         "diagnostics": plan_diagnostics(inst, optimized),
+        "routing": {"provider": routing_label},
     }
