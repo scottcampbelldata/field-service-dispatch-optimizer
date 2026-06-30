@@ -97,11 +97,34 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
       await import("leaflet.markercluster");
       if (!active || !elRef.current || mapRef.current) return;
       const map = L.map(elRef.current, { zoomControl: true });
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-        attribution: "&copy; OpenStreetMap &copy; CARTO",
-        subdomains: "abcd",
-        maxZoom: 19,
-      }).addTo(map);
+
+      // Free, no-key basemaps. Colorful "Streets" is the default; a switcher
+      // lets you flip to Satellite or the original Dark theme.
+      const streets = L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+        { attribution: "&copy; OpenStreetMap &copy; CARTO", subdomains: "abcd", maxZoom: 19 },
+      );
+      const satellite = L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        { attribution: "Tiles &copy; Esri", maxZoom: 19 },
+      );
+      const labels = L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png",
+        { attribution: "", subdomains: "abcd", maxZoom: 19, pane: "shadowPane" },
+      );
+      const dark = L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+        { attribution: "&copy; OpenStreetMap &copy; CARTO", subdomains: "abcd", maxZoom: 19 },
+      );
+      streets.addTo(map);
+      // Pair street labels with satellite imagery so roads stay readable.
+      const satelliteHybrid = L.layerGroup([satellite, labels]);
+      L.control.layers(
+        { Streets: streets, Satellite: satelliteHybrid, Dark: dark },
+        {},
+        { position: "bottomright", collapsed: true },
+      ).addTo(map);
+
       map.setView([32.85, -96.75], 11);
       mapRef.current = map;
       layerRef.current = L.layerGroup().addTo(map);
