@@ -84,6 +84,14 @@ export interface OptimizeParams {
   max_solve_seconds: number;
 }
 
+export type RoutingProvider = "haversine" | "openrouteservice" | "osrm";
+export interface RoutingConfig {
+  provider: RoutingProvider;
+  api_key?: string;       // OpenRouteService key (session only)
+  osrm_base_url?: string; // OSRM endpoint (session only)
+}
+export const DEFAULT_ROUTING: RoutingConfig = { provider: "haversine" };
+
 export const DEFAULT_PARAMS: OptimizeParams = {
   technician_count: null,
   job_count: null,
@@ -105,11 +113,20 @@ async function get<T>(path: string): Promise<T> {
 export const fetchWorkload = () => get<Workload>("/api/workload");
 export const fetchSystem = () => get<Record<string, unknown>>("/api/system");
 
-export async function optimize(params: OptimizeParams): Promise<OptimizeResult> {
+export async function optimize(
+  params: OptimizeParams,
+  routing?: RoutingConfig | null,
+): Promise<OptimizeResult> {
+  // Only send a routing override when it's a real (non-default) choice; the
+  // key lives in memory for this session and is sent per request, never stored.
+  const body =
+    routing && routing.provider !== "haversine"
+      ? { ...params, routing }
+      : { ...params };
   const r = await fetch(`${API_BASE}/api/optimize`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(params),
+    body: JSON.stringify(body),
   });
   if (!r.ok) throw new Error(`optimize -> ${r.status}`);
   return r.json();

@@ -63,7 +63,7 @@ def workload() -> dict:
 
 @app.post("/api/optimize")
 def optimize(req: OptimizeRequest) -> dict:
-    return solve_service.optimize(req.to_transform_kwargs())
+    return solve_service.optimize(req.to_transform_kwargs(), routing_override=req.routing_override())
 
 
 @app.get("/api/runs/{run_id}")

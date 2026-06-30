@@ -14,15 +14,16 @@ from backend.optimizer.cp_sat_model import plan_optimized
 from backend.optimizer.metrics import compare, plan_diagnostics, plan_metrics
 
 
-def optimize(params: dict) -> dict:
+def optimize(params: dict, routing_override: dict | None = None) -> dict:
     from backend.optimizer.transform import transform
 
     base = repository.load_base()
     inst = transform(base, **params)
 
     # Resolve the travel provider (real road routing if configured, else the
-    # Instance's built-in haversine). Both baseline and optimizer then use it.
-    travel_fn, routing_label = routing.build_travel_provider(inst)
+    # Instance's built-in haversine). A per-request override from the UI takes
+    # precedence over server env config. Both planners then use it.
+    travel_fn, routing_label = routing.build_travel_provider(inst, override=routing_override)
     if travel_fn is not None:
         inst = replace(inst, travel_provider=travel_fn)
 

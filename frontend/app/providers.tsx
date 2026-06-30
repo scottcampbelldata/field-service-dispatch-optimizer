@@ -3,8 +3,10 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import {
   DEFAULT_PARAMS,
+  DEFAULT_ROUTING,
   OptimizeParams,
   OptimizeResult,
+  RoutingConfig,
   Workload,
   fetchWorkload,
   optimize,
@@ -15,6 +17,8 @@ interface Ctx {
   workloadError: string | null;
   params: OptimizeParams;
   setParams: (p: Partial<OptimizeParams>) => void;
+  routing: RoutingConfig;
+  setRouting: (r: Partial<RoutingConfig>) => void;
   result: OptimizeResult | null;
   loading: boolean;
   error: string | null;
@@ -27,6 +31,7 @@ export function DispatchProvider({ children }: { children: React.ReactNode }) {
   const [workload, setWorkload] = useState<Workload | null>(null);
   const [workloadError, setWorkloadError] = useState<string | null>(null);
   const [params, setParamsState] = useState<OptimizeParams>(DEFAULT_PARAMS);
+  const [routing, setRoutingState] = useState<RoutingConfig>(DEFAULT_ROUTING);
   const [result, setResult] = useState<OptimizeResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,11 +46,15 @@ export function DispatchProvider({ children }: { children: React.ReactNode }) {
     setParamsState((prev) => ({ ...prev, ...p }));
   }, []);
 
+  const setRouting = useCallback((r: Partial<RoutingConfig>) => {
+    setRoutingState((prev) => ({ ...prev, ...r }));
+  }, []);
+
   const runOptimize = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const r = await optimize(params);
+      const r = await optimize(params, routing);
       setResult(r);
       return r;
     } catch (e) {
@@ -54,11 +63,11 @@ export function DispatchProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [params]);
+  }, [params, routing]);
 
   return (
     <DispatchContext.Provider
-      value={{ workload, workloadError, params, setParams, result, loading, error, runOptimize }}
+      value={{ workload, workloadError, params, setParams, routing, setRouting, result, loading, error, runOptimize }}
     >
       {children}
     </DispatchContext.Provider>

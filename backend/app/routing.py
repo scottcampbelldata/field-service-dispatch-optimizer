@@ -27,13 +27,20 @@ from backend.optimizer.travel import TravelFn, make_haversine_provider, make_mat
 HAVERSINE_LABEL = "Haversine (great-circle)"
 
 
-def build_travel_provider(instance: Instance) -> tuple[TravelFn | None, str]:
+def build_travel_provider(instance: Instance, override: dict | None = None) -> tuple[TravelFn | None, str]:
     """Return (provider_or_None, active_label).
 
-    ``None`` means "use the Instance's built-in haversine". The label always
-    describes what will actually be used so the UI can show it honestly.
+    ``None`` means "use the Instance's built-in haversine". A per-request
+    ``override`` (session-only config from the UI) takes precedence over server
+    env config; its key is used only for this call and never persisted. The
+    label always describes what will actually be used so the UI can show it
+    honestly.
     """
-    provider = (settings.routing_provider or "haversine").lower()
+    override = override or {}
+    provider = (override.get("provider") or settings.routing_provider or "haversine").lower()
+    api_key = override.get("api_key") or settings.ors_api_key
+    osrm_url = override.get("osrm_base_url") or settings.osrm_base_url
+
     if provider in ("", "haversine"):
         return None, HAVERSINE_LABEL
 
@@ -45,14 +52,14 @@ def build_travel_provider(instance: Instance) -> tuple[TravelFn | None, str]:
 
     try:
         if provider == "openrouteservice":
-            if not settings.ors_api_key:
-                return None, f"{HAVERSINE_LABEL} — set ORS_API_KEY to enable OpenRouteService"
-            matrix = _ors_matrix(points, settings.ors_api_key)
+            if not api_key:
+                return None, f"{HAVERSINE_LABEL} — add an OpenRouteService key to enable real road routing"
+            matrix = _ors_matrix(points, api_key)
             label = "OpenRouteService (real road)"
         elif provider == "osrm":
-            if not settings.osrm_base_url:
-                return None, f"{HAVERSINE_LABEL} — set OSRM_BASE_URL to enable OSRM"
-            matrix = _osrm_table(points, settings.osrm_base_url)
+            if not osrm_url:
+                return None, f"{HAVERSINE_LABEL} — add an OSRM endpoint to enable real road routing"
+            matrix = _osrm_table(points, osrm_url)
             label = "OSRM (real road)"
         else:
             return None, HAVERSINE_LABEL
