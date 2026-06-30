@@ -1,5 +1,6 @@
 "use client";
 
+import { SimpleBarChart } from "@/components/Charts";
 import { EmptyState } from "@/components/EmptyState";
 import { useDispatch } from "@/app/providers";
 import { REASON_LABEL } from "@/lib/format";
@@ -17,7 +18,6 @@ export default function ConstraintsPage() {
 
   const d = result.diagnostics;
   const capPct = Math.round((d.total_demand_minutes / Math.max(1, d.total_capacity_minutes)) * 100);
-  const maxReason = Math.max(1, ...d.unassigned_by_reason.map((r) => r.count));
 
   return (
     <div className="mx-auto max-w-7xl p-5 space-y-5">
@@ -64,22 +64,21 @@ export default function ConstraintsPage() {
           {d.unassigned_by_reason.length === 0 ? (
             <p className="text-sm" style={{ color: "var(--muted)" }}>Every job was assigned.</p>
           ) : (
-            <div className="space-y-3">
-              {d.unassigned_by_reason.map((r) => (
-                <div key={r.reason}>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>{REASON_LABEL[r.reason] ?? r.reason}</span>
-                    <span className="mono">{r.count}</span>
-                  </div>
-                  <div className="h-3 rounded" style={{ background: "var(--panel-2)" }}>
-                    <div className="h-3 rounded" style={{ width: `${(r.count / maxReason) * 100}%`, background: "var(--warn)" }} />
-                  </div>
-                  <p className="text-xs mt-1" style={{ color: "var(--muted)" }}>
-                    {REASON_EXPLAIN[r.reason]}
-                  </p>
-                </div>
-              ))}
-            </div>
+            <>
+              <SimpleBarChart
+                data={d.unassigned_by_reason.map((r) => ({
+                  reason: REASON_LABEL[r.reason] ?? r.reason, count: r.count,
+                }))}
+                xKey="reason" barKey="count" color="var(--warn)" yLabel="Jobs" height={200} />
+              <ul className="mt-3 space-y-2">
+                {d.unassigned_by_reason.map((r) => (
+                  <li key={r.reason} className="text-xs" style={{ color: "var(--muted)" }}>
+                    <span style={{ color: "var(--foreground)" }}>{REASON_LABEL[r.reason] ?? r.reason}</span>
+                    {" — "}{REASON_EXPLAIN[r.reason]}
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
         </div>
       </div>

@@ -13,21 +13,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-
-const AXIS = { fill: "var(--muted)", fontSize: 11 };
-const GRID = "var(--border)";
-const TOOLTIP = {
-  contentStyle: {
-    background: "var(--panel)",
-    border: "1px solid var(--border)",
-    borderRadius: 8,
-    color: "var(--foreground)",
-    fontSize: 12,
-  },
-  labelStyle: { color: "var(--muted)" },
-  itemStyle: { color: "var(--foreground)" },
-  cursor: { stroke: "var(--border)" },
-};
+import { AXIS, GRID, TOOLTIP } from "@/components/chartTheme";
 
 export interface LineDef { key: string; name: string; color: string; }
 
