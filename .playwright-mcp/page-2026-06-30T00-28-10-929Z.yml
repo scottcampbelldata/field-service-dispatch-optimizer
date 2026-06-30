@@ -1,0 +1,102 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: A
+        - generic [ref=e6]:
+          - generic [ref=e7]: Atlas Field Services
+          - generic [ref=e8]: Dispatch Optimizer
+      - navigation [ref=e9]:
+        - link "Dispatch Board" [ref=e10] [cursor=pointer]:
+          - /url: /
+        - link "Baseline vs Optimized" [ref=e11] [cursor=pointer]:
+          - /url: /compare
+      - generic [ref=e12]:
+        - generic [ref=e13]: OR-Tools CP-SAT
+        - generic [ref=e14]: synthetic data
+  - main [ref=e15]:
+    - generic [ref=e16]:
+      - generic [ref=e17]:
+        - generic [ref=e18]:
+          - heading "Scenario controls" [level=2] [ref=e19]
+          - button "reset" [ref=e20]
+        - generic [ref=e21]:
+          - generic [ref=e22]:
+            - generic [ref=e23]: Technicians available
+            - generic [ref=e24]: "12"
+          - slider [ref=e25]: "12"
+        - generic [ref=e26]:
+          - generic [ref=e27]:
+            - generic [ref=e28]: Jobs in backlog
+            - generic [ref=e29]: "110"
+          - slider [ref=e30]: "110"
+        - generic [ref=e31]:
+          - generic [ref=e33]: Optimization goal
+          - combobox [ref=e34]:
+            - option "Balanced" [selected]
+            - option "Maximize jobs completed"
+            - option "Minimize travel"
+            - option "Protect SLAs"
+        - generic [ref=e35]:
+          - generic [ref=e36]:
+            - generic [ref=e37]: Traffic penalty
+            - generic [ref=e38]: 1.0×
+          - slider [ref=e39]: "1"
+        - generic [ref=e40]:
+          - generic [ref=e41]:
+            - generic [ref=e42]: Emergency rate
+            - generic [ref=e43]: 0%
+          - slider [ref=e44]: "0"
+        - generic [ref=e45]:
+          - generic [ref=e47]: Skill shortage
+          - combobox [ref=e48]:
+            - option "None" [selected]
+        - generic [ref=e49]:
+          - generic [ref=e51]: SLA strictness
+          - generic [ref=e52]:
+            - button "lenient" [ref=e53]
+            - button "normal" [ref=e54]
+            - button "strict" [ref=e55]
+        - generic [ref=e56]:
+          - generic [ref=e58]: Overtime allowed
+          - button "Enabled" [ref=e59]
+        - generic [ref=e60]:
+          - generic [ref=e61]:
+            - generic [ref=e62]: Solver time budget
+            - generic [ref=e63]: 8s
+          - slider [ref=e64]: "8"
+        - button "Optimize Schedule" [ref=e65]
+      - generic [ref=e66]:
+        - generic [ref=e67]:
+          - generic [ref=e68]:
+            - generic [ref=e69]: Technicians on shift
+            - generic [ref=e70]: "0"
+          - generic [ref=e71]:
+            - generic [ref=e72]: Jobs in backlog
+            - generic [ref=e73]: "0"
+          - generic [ref=e74]:
+            - generic [ref=e75]: Skill types
+            - generic [ref=e76]: "0"
+        - generic [ref=e77]:
+          - generic [ref=e78]:
+            - heading "Service region" [level=2] [ref=e79]
+            - generic [ref=e80]:
+              - generic [ref=e81]: tech base
+              - generic [ref=e83]: P1
+              - generic [ref=e85]: P3
+          - img [ref=e88]
+        - generic [ref=e100]:
+          - generic [ref=e101]:
+            - heading "Unassigned backlog" [level=2] [ref=e102]
+            - generic [ref=e103]: sorted by priority, then SLA deadline
+          - table [ref=e105]:
+            - rowgroup [ref=e106]:
+              - row "Job Site Skill Priority SLA Duration Part" [ref=e107]:
+                - columnheader "Job" [ref=e108]
+                - columnheader "Site" [ref=e109]
+                - columnheader "Skill" [ref=e110]
+                - columnheader "Priority" [ref=e111]
+                - columnheader "SLA" [ref=e112]
+                - columnheader "Duration" [ref=e113]
+                - columnheader "Part" [ref=e114]
+            - rowgroup
