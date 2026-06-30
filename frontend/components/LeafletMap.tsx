@@ -87,6 +87,8 @@ function stopPopup(s: Route["stops"][number], techName: string, color: string): 
 // Coordinates are [lon=x, lat=y]; Leaflet wants [lat, lon].
 export default function LeafletMap({ technicians, jobs, routes }: Props) {
   const elRef = useRef<HTMLDivElement>(null);
+  const routesPanelRef = useRef<HTMLDivElement>(null);
+  const legendRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mapRef = useRef<any>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -263,14 +265,27 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
       if (!hasRoutes || selected === null) bounds.push([t.home_y, t.home_x]);
     });
 
-    // Reserve the top-right column for the Routes legend and a little bottom
-    // room for the priority legend / attribution, so auto-fitting an isolated
-    // route never frames its stops underneath an overlay panel.
-    if (bounds.length) map.fitBounds(bounds, {
-      paddingTopLeft: [24, 24],
-      paddingBottomRight: [hasRoutes ? 196 : 24, 56],
-      maxZoom: 14,
-    });
+    // Auto-fit must not frame stops underneath the HTML overlays. Measure the
+    // actual overlay rects so we reserve exactly the space they occupy: the
+    // Routes legend (top-right) reserves the right edge, the priority legend
+    // (bottom-left, plus the bottom-right layers control) reserves the bottom.
+    // Clamped to 45% per axis so a tight route never collapses to a sliver.
+    if (bounds.length) {
+      const cont = elRef.current?.getBoundingClientRect();
+      const padTop = 24, padLeft = 24;
+      let padRight = 24, padBottom = 56;
+      if (cont) {
+        const rp = routesPanelRef.current?.getBoundingClientRect();
+        if (rp) padRight = Math.min(cont.width * 0.45, Math.max(padRight, cont.right - rp.left + 12));
+        const lg = legendRef.current?.getBoundingClientRect();
+        if (lg) padBottom = Math.min(cont.height * 0.45, Math.max(padBottom, cont.bottom - lg.top + 12));
+      }
+      map.fitBounds(bounds, {
+        paddingTopLeft: [padLeft, padTop],
+        paddingBottomRight: [padRight, padBottom],
+        maxZoom: 14,
+      });
+    }
   }, [ready, technicians, jobs, routes, selected]);
 
   return (
@@ -282,7 +297,7 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
           clicking the polyline, but discoverable and precise where the lines
           overlap. Selection is shared state, so map and legend stay in sync. */}
       {!!routes?.length && (
-        <div className="absolute z-[600] right-2 top-2 w-44 rounded-md text-[11px]"
+        <div ref={routesPanelRef} className="absolute z-[600] right-2 top-2 w-44 rounded-md text-[11px]"
           style={{ background: "color-mix(in srgb, var(--surface-1) 92%, transparent)", border: "1px solid var(--border)", backdropFilter: "blur(4px)" }}>
           <div className="flex items-center justify-between gap-2 px-2 pt-1.5 pb-1">
             <button onClick={() => setRoutesOpen((o) => !o)} className="flex items-center gap-1 font-medium"
@@ -320,7 +335,7 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
         </div>
       )}
 
-      <div className="absolute z-[500] left-2 bottom-2 rounded-md px-2.5 py-2 text-[11px] space-y-1"
+      <div ref={legendRef} className="absolute z-[500] left-2 bottom-2 rounded-md px-2.5 py-2 text-[11px] space-y-1"
         style={{ background: "color-mix(in srgb, var(--surface-1) 90%, transparent)", border: "1px solid var(--border)", color: "var(--text-muted)", backdropFilter: "blur(4px)" }}>
         <LegendRow color="#f43f5e" label="P1 critical" />
         <LegendRow color="#f59e0b" label="P2 high" />
