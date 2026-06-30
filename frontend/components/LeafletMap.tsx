@@ -95,6 +95,7 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
   const LRef = useRef<any>(null);
   const [ready, setReady] = useState(false);
   const [selected, setSelected] = useState<number | null>(null);
+  const [routesOpen, setRoutesOpen] = useState(true);
 
   useEffect(() => {
     let active = true;
@@ -277,13 +278,19 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
         <div className="absolute z-[600] right-2 top-2 w-44 rounded-md text-[11px]"
           style={{ background: "color-mix(in srgb, var(--surface-1) 92%, transparent)", border: "1px solid var(--border)", backdropFilter: "blur(4px)" }}>
           <div className="flex items-center justify-between gap-2 px-2 pt-1.5 pb-1">
-            <span className="font-medium" style={{ color: "var(--text-muted)" }}>Routes</span>
+            <button onClick={() => setRoutesOpen((o) => !o)} className="flex items-center gap-1 font-medium"
+              style={{ color: "var(--text-muted)" }} title={routesOpen ? "Collapse" : "Expand"}>
+              <span style={{ display: "inline-block", transition: "transform .15s ease", transform: routesOpen ? "rotate(90deg)" : "none" }}>▸</span>
+              Routes
+              <span className="mono" style={{ color: "var(--text-faint)" }}>({routes.length})</span>
+            </button>
             {selected !== null && (
               <button onClick={() => setSelected(null)} className="font-medium" style={{ color: "var(--accent)" }}>
                 Show all
               </button>
             )}
           </div>
+          {routesOpen && (
           <div className="max-h-[190px] overflow-auto px-1 pb-1 space-y-0.5">
             {routes.map((rt, i) => {
               const color = `hsl(${ROUTE_HUES[i % ROUTE_HUES.length]} 80% 60%)`;
@@ -302,6 +309,7 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
               );
             })}
           </div>
+          )}
         </div>
       )}
 
