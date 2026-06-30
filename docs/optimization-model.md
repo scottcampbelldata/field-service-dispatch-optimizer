@@ -60,10 +60,17 @@ Two techniques make an 8-second live solve reliable:
 1. **Candidate capping.** Each technician only considers its nearest feasible
    jobs (plus everything the baseline assigned to it). This keeps the routing
    circuits small instead of `O(jobs)` per technician.
-2. **Warm start.** The greedy baseline is hinted into the model as a complete,
-   feasible solution. CP-SAT therefore always has an incumbent at least as good
-   as the baseline, so the optimized plan never loses to the baseline even when
-   the solver cannot prove optimality within the time budget.
+2. **Warm start + safety net.** The greedy baseline is hinted into the model as a
+   complete, feasible solution, so CP-SAT always starts from an incumbent at
+   least as good as the baseline. As a backstop, if the solver's best solution
+   within the time budget scores below the baseline objective (or it finds none),
+   the engine returns the baseline plan itself. Combined with a throughput-floor
+   constraint (complete at least as many jobs as the baseline), this means the
+   optimized plan's objective and completed-job count do not fall below the
+   baseline within the live solve budget - by construction, not by luck. Both
+   properties are asserted in the tests. Note this is an objective-level
+   guarantee: an individual metric (e.g. raw SLA-breach count) can still move
+   either way, since completing more jobs can change downstream counts.
 
 ## The baseline (foil)
 
