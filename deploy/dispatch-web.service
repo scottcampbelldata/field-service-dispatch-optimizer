@@ -1,0 +1,17 @@
+# /etc/systemd/system/dispatch-web.service
+[Unit]
+Description=Field Service Dispatch Optimizer web (Next.js)
+After=network.target dispatch-api.service
+
+[Service]
+User=www-data
+WorkingDirectory=/opt/dispatch/frontend
+Environment=NODE_ENV=production
+Environment=NEXT_PUBLIC_API_BASE=https://dispatch-api.scottcampbell.io
+Environment=PORT=3000
+ExecStart=/usr/bin/npm run start
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
