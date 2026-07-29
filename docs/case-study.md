@@ -17,19 +17,37 @@ differs.
 - **Optimized** — OR-Tools CP-SAT, warm-started from the baseline, minimizing a
   weighted objective over completion, travel, SLA breaches, and overtime.
 
-## Result on the canonical day (seed 42, default settings)
+## Result across 200 randomized scenarios
 
-| Metric | Manual | Optimized | Change |
-|--------|-------:|----------:|-------:|
-| Jobs completed | 77 | **81** | +4 |
-| SLA breaches | 33 | **15** | −18 |
-| Travel hours | 18.4 | **17.1** | −1.3 |
-| Overtime hours | 18.0 | **7.5** | −10.5 |
-| Unassigned jobs | 33 | **29** | −4 |
+This section previously reported one seeded day against a naive baseline. That
+comparison was not informative: the naive dispatcher misses a median of 45.6% of
+the deadlines it schedules, so beating it measured the strawman rather than the
+solver. It also did not reproduce; on seed 42 the baseline records 32 breaches,
+not 33, and the optimized column only reaches 15 at roughly a 60s budget rather
+than the documented 8s default.
 
-More jobs completed **and** fewer breaches **and** less overtime — with the same
-crew. The gain is planning quality, not extra resources. (Exact figures move with
-the solver time budget; the direction is stable.)
+The current benchmark compares three planners across 200 randomized scenarios
+against a real baseline, greedy nearest-qualified with 2-opt improvement and
+cheapest-insertion backfill:
+
+| Comparison | SLA breaches (median) | 5th-95th pct | Overtime hours (median) |
+|------------|----------------------:|-------------:|------------------------:|
+| greedy+2-opt vs naive | **12 fewer** | 3 to 22 fewer | 3.35 fewer |
+| CP-SAT vs naive | 5 fewer | 14 fewer to 0 | 2.20 fewer |
+| CP-SAT vs greedy+2-opt | roughly at parity | | |
+
+Budget sweep over 24 scenarios, median SLA difference vs greedy+2-opt:
+
+| Solver budget | 2s | 8s (shipped) | 30s | 60s |
+|---------------|---:|-------------:|----:|----:|
+| Median difference | +9 worse | +5 worse | 3 better | 5 better |
+
+The finding is that the shipped 8s budget sits below the threshold where
+constraint programming beats a good heuristic, not that the model is wrong.
+
+The greedy and naive arms are deterministic. The CP-SAT arm is not: 8 search
+workers race a wall-clock limit, so `random_seed=42` does not determinize it and
+per-scenario verdicts shift across runs. Only the distribution is meaningful.
 
 ## What the optimizer reveals
 

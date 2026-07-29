@@ -51,21 +51,47 @@ limited people, time, travel, skills, and SLA risk, what should we do next?
 ### Executive Summary — the plan in management language
 ![Executive Summary](screenshots/executive-summary.png)
 
-## The killer comparison
+## The comparison
 
-Same technicians, same jobs, same constraints — only the planning differs
-(canonical day, seed 42, default settings):
+The table this README used to lead with reported a single seeded day against a
+deliberately naive baseline. It did not reproduce, and beating that baseline
+proved very little: measured across 200 randomized scenarios, the naive
+priority-first dispatcher misses a median of **45.6%** of the deadlines it
+schedules. No real operation runs that way.
 
-| Metric | Manual baseline | Optimized | Change |
-|--------|----------------:|----------:|-------:|
-| Jobs completed | 77 | **81** | +4 |
-| SLA breaches | 33 | **15** | −18 |
-| Travel hours | 18.4 | **17.1** | −1.3 |
-| Overtime hours | 18.0 | **7.5** | −10.5 |
-| Unassigned jobs | 33 | **29** | −4 |
+The baseline that belongs here is greedy nearest-qualified with a 2-opt
+improvement pass and cheapest-insertion backfill (`backend/optimizer/greedy_2opt.py`),
+which is roughly what an engineer writes in an afternoon without a solver.
 
-More jobs completed **and** fewer SLA breaches **and** less overtime, with the
-same crew. See [docs/case-study.md](docs/case-study.md).
+Across 200 randomized scenarios (crew 6-18, backlog 70-150, varying skill mix,
+emergency rate, and travel scale), at the shipped 8s solver budget:
+
+| Comparison | SLA breaches (median) | 5th-95th pct | Overtime hours (median) |
+|------------|----------------------:|-------------:|------------------------:|
+| greedy+2-opt vs naive | **12 fewer** | 3 to 22 fewer | 3.35 fewer |
+| CP-SAT vs naive | 5 fewer | 14 fewer to 0 | 2.20 fewer |
+| CP-SAT vs greedy+2-opt | roughly at parity | | |
+
+The greedy arms are deterministic and reproduce bit-identically. **The CP-SAT
+arm does not**: `cp_sat_model.py` runs 8 search workers against a wall-clock
+limit, so `random_seed=42` does not make it deterministic and per-scenario
+results shift between runs. Treat its numbers as a distribution, not per-seed.
+
+### The finding
+
+CP-SAT is not ahead of a good heuristic at the budget this product ships. A
+sweep over 24 scenarios at 2 / 8 / 30 / 60 seconds moves the median SLA
+difference against greedy+2-opt from **+9 and +5 worse** to **3 and 5 better**.
+The model is sound; the default time budget sits below the point where
+constraint programming pays for itself. The old strawman baseline concealed
+that, because 8 seconds looks like plenty against an opponent missing 45% of
+its deadlines.
+
+Reproduce: `python -m backend.experiments.seed_sweep --seeds 200 --solve-seconds 8`
+and `python -m backend.experiments.budget_scaling --seeds 24 --budgets 2,8,30,60`.
+Raw per-scenario rows are committed under `backend/experiments/results/`.
+
+See [docs/case-study.md](docs/case-study.md).
 
 ## Reviewer path
 
