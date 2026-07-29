@@ -27,3 +27,6 @@ frontend/.playwright-mcp/
 
 # Playwright MCP artifacts (root)
 .playwright-mcp/
+
+# experiment progress logs (raw CSV results are committed)
+backend/experiments/results/*.log
