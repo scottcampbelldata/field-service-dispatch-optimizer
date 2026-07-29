@@ -1,0 +1,45 @@
+n = 200 seeds   source = backend/experiments/results/seed_sweep.csv
+
+== 1. is the warm-started comparison capable of a negative? ==
+  cpsat objective < its own warm start (naive): 0/200 seeds   (identical to warm start: 16/200)
+  cpsat_ws2opt objective < its own warm start (greedy2opt): 0/200 seeds   (identical to warm start: 51/200)
+  cpsat objective < greedy2opt (a baseline it was NOT warm-started from): 186/200 seeds
+
+== 2. headline candidates ==
+  SLA breaches, cpsat vs naive        median -5.0   p5..p95 -14.0 .. +0.0   mean -5.8
+  SLA breaches, cpsat vs greedy2opt   median +6.0   p5..p95 -3.0 .. +18.0   mean +6.6
+  SLA breaches, greedy2opt vs naive   median -12.0   p5..p95 -22.0 .. -3.0   mean -12.4
+  Overtime hrs, cpsat vs naive        median -2.2   p5..p95 -8.2 .. +0.0   mean -2.8
+  Overtime hrs, cpsat vs greedy2opt   median +0.9   p5..p95 -4.6 .. +6.6   mean +0.8
+  Overtime hrs, greedy2opt vs naive   median -3.3   p5..p95 -7.7 .. -0.3   mean -3.6
+  Jobs done,    cpsat vs greedy2opt   median -1.0   p5..p95 -5.0 .. +0.1   mean -1.7
+  SLA breaches, ws2opt vs greedy2opt  median +0.0   p5..p95 -3.1 .. +0.0   mean -0.8
+  Overtime hrs, ws2opt vs greedy2opt  median -0.1   p5..p95 -2.8 .. +0.0   mean -0.7
+  Jobs done,    ws2opt vs greedy2opt  median +0.0   p5..p95 +0.0 .. +2.0   mean +0.4
+
+== 3. baseline realism (SLA failure rate among scheduled jobs) ==
+  naive          median  45.6%   p5..p95 25.3% .. 66.1%
+  greedy2opt     median  26.9%   p5..p95 13.7% .. 43.6%
+  cpsat          median  36.2%   p5..p95 18.2% .. 55.7%
+  cpsat_ws2opt   median  25.5%   p5..p95 12.0% .. 41.7%
+
+== 4. sensitivity: tercile medians of (cpsat - greedy2opt) ==
+  n_techs         [6..18]         breaches: low3rd +1.5 -> high3rd +9.5 (rho +0.45)   |   overtime: low3rd -0.9 -> high3rd +1.8 (rho +0.32)
+  n_jobs          [70..150]       breaches: low3rd +2.5 -> high3rd +9.0 (rho +0.41)   |   overtime: low3rd +0.2 -> high3rd +1.6 (rho +0.24)
+  skill_mix       [1.01..3.49]    breaches: low3rd +4.0 -> high3rd +7.0 (rho +0.18)   |   overtime: low3rd +0.0 -> high3rd +1.2 (rho +0.16)
+  emergency_rate  [0..0.3]        breaches: low3rd +5.0 -> high3rd +5.5 (rho +0.05)   |   overtime: low3rd +0.9 -> high3rd +0.3 (rho +0.01)
+  speed_factor    [0.84..2.19]    breaches: low3rd +7.0 -> high3rd +6.0 (rho -0.08)   |   overtime: low3rd +1.3 -> high3rd +0.2 (rho -0.09)
+  traffic_penalty [1.01..1.8]     breaches: low3rd +7.0 -> high3rd +4.0 (rho -0.18)   |   overtime: low3rd +0.8 -> high3rd +0.7 (rho -0.05)
+  load_ratio      [0.482..3.495]  breaches: low3rd +6.5 -> high3rd +4.5 (rho -0.20)   |   overtime: low3rd +1.1 -> high3rd -0.6 (rho -0.19)
+
+== 5. wins and losses, cpsat vs greedy2opt ==
+  sla_breaches     cpsat better   29/200   tie   10   worse  161
+  overtime_hours   cpsat better   79/200   tie    5   worse  116
+  jobs_completed   cpsat better   10/200   tie   50   worse  140
+  travel_hours     cpsat better   35/200   tie    1   worse  164
+
+== 6. solve time actually consumed ==
+  naive          median   0.001s   max   0.061s   total      0.7s
+  greedy2opt     median   0.017s   max   0.717s   total      8.1s
+  cpsat          median   8.431s   max  18.319s   total   1763.7s
+  cpsat_ws2opt   median   8.442s   max  19.642s   total   1782.2s

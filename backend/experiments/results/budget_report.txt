@@ -1,0 +1,8 @@
+
+n=24 seeds  budgets=[2.0, 8.0, 30.0, 60.0]  wall=2464.9s  raw: backend\experiments\results\budget_scaling.csv
+
+  budget   d_breach_vs_2opt   d_OT_vs_2opt   cpsat<2opt obj  median solve s
+       2                9.0           3.10            24/24            2.36
+       8                5.0           1.05            23/24            8.40
+      30               -3.0          -2.85             9/24           30.41
+      60               -5.0          -3.70             2/24           60.47

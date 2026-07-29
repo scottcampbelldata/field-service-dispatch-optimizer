@@ -1,0 +1,8 @@
+ortools 9.15.6755
+arm           jobs_completed    sla_breaches    travel_hours  overtime_hours      unassigned
+naive                     77              32            17.4            16.1              33
+greedy2opt                79              20            14.9            10.6              31
+cpsat @8s                 79              27            16.5            12.4              31
+cpsat @60s                84              15            15.0             7.4              26
+
+README claims:  naive 77 / 33 / 18.4 / 18.0 / 33   optimized 81 / 15 / 17.1 / 7.5 / 29

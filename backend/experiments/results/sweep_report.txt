@@ -1,0 +1,58 @@
+
+==============================================================================
+SEED SWEEP  n=200  solve budget=8.0s/arm  wall=3575.6s
+raw rows: backend\experiments\results\seed_sweep.csv
+==============================================================================
+
+-- absolute levels (median across seeds) --
+arm            completed  breaches  breach%   OT hrs  travel h  solve s
+naive               76.5      32.0     45.6     14.2      29.2    0.001
+greedy2opt          79.0      20.0     26.9     11.0      24.8    0.017
+cpsat               77.5      26.0     36.2     10.9      26.6    8.431
+cpsat_ws2opt        79.5      20.0     25.5     10.4      24.6    8.442
+
+-- cpsat vs naive          (the old claim) --
+metric               median       p5      p95     mean   better    tie   worse
+sla_breaches          -5.00   -14.00     0.00    -5.79     0.91   0.10    0.00
+overtime_hours        -2.20    -8.21     0.00    -2.83     0.85   0.12    0.03
+jobs_completed         0.00     0.00     5.00     1.17     0.46   0.54    0.00
+travel_hours          -1.45    -6.00     0.91    -1.81     0.78   0.10    0.12
+
+-- cpsat vs greedy2opt     (the honest one) --
+metric               median       p5      p95     mean   better    tie   worse
+sla_breaches           6.00    -3.00    18.00     6.62     0.14   0.05    0.81
+overtime_hours         0.85    -4.61     6.62     0.76     0.40   0.03    0.58
+jobs_completed        -1.00    -5.00     0.05    -1.69     0.05   0.25    0.70
+travel_hours           1.90    -1.90     5.61     1.89     0.17   0.01    0.82
+
+-- cpsat_ws2opt vs greedy2opt --
+metric               median       p5      p95     mean   better    tie   worse
+sla_breaches           0.00    -3.05     0.00    -0.77     0.39   0.57    0.04
+overtime_hours        -0.10    -2.80     0.00    -0.65     0.51   0.45    0.04
+jobs_completed         0.00     0.00     2.00     0.41     0.24   0.76    0.00
+travel_hours           0.00    -1.70     0.81    -0.20     0.46   0.33    0.21
+
+-- greedy2opt vs naive --
+metric               median       p5      p95     mean   better    tie   worse
+sla_breaches         -12.00   -22.00    -3.00   -12.41     0.99   0.01    0.00
+overtime_hours        -3.35    -7.71    -0.30    -3.59     0.95   0.01    0.04
+jobs_completed         2.50     0.00     7.05     2.85     0.82   0.17    0.00
+travel_hours          -3.50    -6.91    -0.99    -3.70     1.00   0.00    0.00
+
+-- inflation from the strawman (per seed) --
+sla_breaches       claimed-vs-naive median=   5.00   honest-vs-2opt median=  -6.00
+overtime_hours     claimed-vs-naive median=   2.20   honest-vs-2opt median=  -0.85
+
+-- sensitivity: Spearman rho vs (cpsat - greedy2opt) --
+knob                rho(breaches)  rho(overtime)  rho(completed)
+n_techs                     0.446          0.319           0.238
+n_jobs                      0.409          0.241          -0.357
+skill_mix                   0.177          0.158           0.189
+emergency_rate              0.045          0.009          -0.016
+speed_factor               -0.075         -0.091          -0.187
+traffic_penalty            -0.183         -0.054           0.074
+load_ratio                 -0.195         -0.187          -0.368
+
+-- CP-SAT solver status mix --
+cpsat         {'FEASIBLE': 189, 'warm_start_fallback': 11}
+cpsat_ws2opt  {'FEASIBLE': 185, 'warm_start_fallback': 15}
