@@ -48,9 +48,9 @@ export default function BoardPage() {
 
       <div className="space-y-5">
         <div className="grid grid-cols-3 gap-4">
-          <Stat label="Technicians on shift" value={visibleTechs.length} />
-          <Stat label="Jobs in backlog" value={visibleJobs.length} />
-          <Stat label="Skill types" value={workload?.skills.length ?? 0} />
+          <Stat label="Technicians on shift" value={workload ? visibleTechs.length : null} />
+          <Stat label="Jobs in backlog" value={workload ? visibleJobs.length : null} />
+          <Stat label="Skill types" value={workload ? workload.skills.length : null} />
         </div>
 
         <div className="panel p-4">
@@ -110,11 +110,11 @@ export default function BoardPage() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({ label, value }: { label: string; value: number | null }) {
   return (
     <div className="panel p-4">
       <div className="text-xs uppercase tracking-wide" style={{ color: "var(--muted)" }}>{label}</div>
-      <div className="mt-1 text-3xl font-semibold mono">{value}</div>
+      <div className="mt-1 text-3xl font-semibold mono">{value === null ? "—" : value}</div>
     </div>
   );
 }

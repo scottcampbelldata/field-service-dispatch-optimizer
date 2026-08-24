@@ -25,19 +25,22 @@ const selectStyle = {
 export function ControlPanel() {
   const { workload, params, setParams, runOptimize, loading } = useDispatch();
   const router = useRouter();
-
-  const maxTechs = workload?.technicians.length ?? 12;
-  const maxJobs = workload?.jobs.length ?? 110;
+  const ready = workload !== null;
+  // Dummy 4 / 20 keep range DOM valid while loading; Row shows "—" instead.
+  const maxTechs = ready ? workload.technicians.length : 4;
+  const maxJobs = ready ? workload.jobs.length : 20;
+  const techs = ready ? (params.technician_count ?? maxTechs) : 4;
+  const jobs = ready ? (params.job_count ?? maxJobs) : 20;
 
   // Initialise counts to "all" once the workload is known.
   useEffect(() => {
     if (workload && params.technician_count === null) {
-      setParams({ technician_count: maxTechs, job_count: maxJobs });
+      setParams({
+        technician_count: workload.technicians.length,
+        job_count: workload.jobs.length,
+      });
     }
-  }, [workload, params.technician_count, maxTechs, maxJobs, setParams]);
-
-  const techs = params.technician_count ?? maxTechs;
-  const jobs = params.job_count ?? maxJobs;
+  }, [workload, params.technician_count, setParams]);
 
   async function handleOptimize() {
     const r = await runOptimize();
@@ -49,11 +52,16 @@ export function ControlPanel() {
       <div className="flex items-center justify-between">
         <h2 className="font-semibold">Scenario controls</h2>
         <button
-          onClick={() => setParams({
-            traffic_penalty: 1, emergency_rate: 0, skill_shortage: null,
-            sla_strictness: "normal", overtime_allowed: true, optimization_goal: "balanced",
-            technician_count: maxTechs, job_count: maxJobs,
-          })}
+          type="button"
+          disabled={!ready}
+          onClick={() => {
+            if (!workload) return;
+            setParams({
+              traffic_penalty: 1, emergency_rate: 0, skill_shortage: null,
+              sla_strictness: "normal", overtime_allowed: true, optimization_goal: "balanced",
+              technician_count: workload.technicians.length, job_count: workload.jobs.length,
+            });
+          }}
           className="text-xs"
           style={{ color: "var(--muted)" }}
         >
@@ -61,14 +69,14 @@ export function ControlPanel() {
         </button>
       </div>
 
-      <Row label="Technicians available" value={`${techs}`}>
-        <input type="range" min={4} max={maxTechs} value={techs}
+      <Row label="Technicians available" value={ready ? `${techs}` : "—"}>
+        <input type="range" min={4} max={maxTechs} value={techs} disabled={!ready}
           onChange={(e) => setParams({ technician_count: +e.target.value })}
           className="w-full" />
       </Row>
 
-      <Row label="Jobs in backlog" value={`${jobs}`}>
-        <input type="range" min={20} max={maxJobs} value={jobs}
+      <Row label="Jobs in backlog" value={ready ? `${jobs}` : "—"}>
+        <input type="range" min={20} max={maxJobs} value={jobs} disabled={!ready}
           onChange={(e) => setParams({ job_count: +e.target.value })}
           className="w-full" />
       </Row>
