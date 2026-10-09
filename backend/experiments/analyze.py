@@ -5,7 +5,7 @@ Answers three questions the summary table in ``seed_sweep`` does not:
 1. **Is "optimized beats baseline" a measurement or a tautology?** Counts seeds
    where the CP-SAT objective falls below its own warm start. Because
    ``plan_optimized`` hints the warm start and falls back to it when the
-   incumbent scores worse, the answer should be exactly zero — which is the
+   incumbent scores worse, the answer should be exactly zero, and that is the
    point. A comparison that cannot produce a negative is not evidence.
 
 2. **How does the margin move with the generator knobs?** Tercile medians for

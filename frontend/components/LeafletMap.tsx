@@ -64,7 +64,7 @@ function techPopup(t: MapTech, stops?: number): string {
     ${row("Shift", shift)}
     ${stops != null ? row("Jobs on route", String(stops)) : ""}
     ${stops != null ? '<div class="map-pop-hint">click route to isolate</div>' : ""}
-    ${onBoard ? '<div class="map-pop-hint">Daily start/end location — not assigned work. Run the optimizer to assign jobs.</div>' : ""}
+    ${onBoard ? '<div class="map-pop-hint">Daily start/end location, not assigned work. Run the optimizer to assign jobs.</div>' : ""}
   </div>`;
 }
 

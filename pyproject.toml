@@ -38,7 +38,7 @@ select = ["E", "F", "W", "I"]
 ignore = ["E501"]  # line length is enforced loosely; long SQL/strings are fine
 
 [tool.ruff.lint.per-file-ignores]
-# conftest sets DATABASE_URL before importing app modules — imports must follow.
+# conftest sets DATABASE_URL before importing app modules, so imports must follow.
 "backend/tests/conftest.py" = ["E402"]
 
 [build-system]

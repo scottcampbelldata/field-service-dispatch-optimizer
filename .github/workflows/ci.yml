@@ -8,7 +8,7 @@ on:
 
 jobs:
   backend:
-    name: Backend — ruff + pytest
+    name: Backend (ruff + pytest)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,7 +24,7 @@ jobs:
         run: pytest -q
 
   frontend:
-    name: Frontend — type-check + build
+    name: Frontend (type-check + build)
     runs-on: ubuntu-latest
     defaults:
       run:

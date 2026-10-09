@@ -1,9 +1,9 @@
 """Translate user-facing slider parameters into a concrete solver Instance.
 
 The generator produces one canonical "day" (the base Instance). Each optimize
-request transforms that base — subsetting technicians, scaling the job backlog,
+request transforms that base by subsetting technicians, scaling the job backlog,
 injecting emergencies, simulating a skill shortage, and resolving objective
-weights — before both planners run on the result. Transforms are deterministic
+weights, before both planners run on the result. Transforms are deterministic
 (index-based, no RNG) so the same sliders always produce the same scenario.
 """
 

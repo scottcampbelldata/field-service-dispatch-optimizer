@@ -2,11 +2,11 @@
 
 A *travel provider* is any callable ``(ax, ay, bx, by) -> int`` returning the
 **base** one-way travel time in minutes between two points, where ``x`` is
-longitude and ``y`` is latitude. Providers do not apply the traffic multiplier —
+longitude and ``y`` is latitude. Providers do not apply the traffic multiplier;
 the optimizer layers that on top (see ``Instance.travel``), so the UI's traffic
 slider scales whatever the provider returns (haversine or real road times).
 
-* ``haversine`` — great-circle distance x a speed factor (min/km). The default:
+* ``haversine``: great-circle distance x a speed factor (min/km). The default:
   free, offline, deterministic. Powers the public demo.
 * A matrix-backed provider (real road durations from a routing engine) is built
   in the I/O layer (``backend/app/routing.py``) and injected onto the Instance,

@@ -3,7 +3,7 @@
 Translates operational metrics (SLA breaches, overtime, travel, unfinished work)
 into dollars so the optimizer's advantage can be stated as ROI. Rates are
 configurable; defaults are illustrative, round figures for a commercial
-field-service operation. Pure functions — no DB, no I/O.
+field-service operation. Pure functions with no DB and no I/O.
 """
 
 from __future__ import annotations

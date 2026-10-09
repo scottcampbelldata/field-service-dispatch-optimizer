@@ -9,13 +9,13 @@ priority-weighted completion minus travel, SLA, and overtime penalties.
 
 Two techniques keep live solves tractable and trustworthy:
 
-* **Candidate capping** — each technician only considers its nearest feasible
+* **Candidate capping**: each technician only considers its nearest feasible
   jobs (plus everything the baseline gave it), so routing circuits stay small.
-* **Warm start** — the greedy baseline is hinted as a complete feasible
+* **Warm start**: the greedy baseline is hinted as a complete feasible
   solution, so the solver always has an incumbent at least as good as the
   baseline and returns a usable plan even when it cannot prove optimality.
 
-The engine depends only on the domain dataclasses and ``travel`` — no DB.
+The engine depends only on the domain dataclasses and ``travel``, not on the DB.
 """
 
 from __future__ import annotations
@@ -130,8 +130,8 @@ def plan_optimized(
             model.Add(sum(vs) <= 1)
 
     # Throughput floor: complete at least as many jobs as the (feasible) warm
-    # start. This makes throughput lexicographically dominant — the optimizer
-    # can never finish fewer jobs than the manual baseline — while leaving the
+    # start. This makes throughput lexicographically dominant (the optimizer
+    # can never finish fewer jobs than the manual baseline) while leaving the
     # objective weights free to cut breaches, travel, and overtime above it.
     baseline_completed = len(warm.assigned())
     if visit and baseline_completed > 0:
@@ -228,7 +228,7 @@ def plan_optimized(
 
     # Safety net: an anytime solver can return a weak incumbent on a short
     # solve. The warm-start baseline is always feasible, so never return
-    # anything worse than it — guarantees optimized >= baseline in every case.
+    # anything worse than it. That guarantees optimized >= baseline in every case.
     if not has_solution or compute_objective(instance, opt_plan) < compute_objective(instance, warm):
         return Plan(
             plan_type="optimized",

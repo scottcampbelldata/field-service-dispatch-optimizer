@@ -19,8 +19,8 @@ distribution, not one cherry-picked day, is what gets quoted.
 
 Arms
 ----
-``naive``         ``baseline.plan_baseline`` — the current README foil.
-``greedy2opt``    ``greedy_2opt.plan_greedy_2opt`` — the honest baseline.
+``naive``         ``baseline.plan_baseline``, the naive baseline.
+``greedy2opt``    ``greedy_2opt.plan_greedy_2opt``, the stronger baseline.
 ``cpsat``         ``plan_optimized`` exactly as the app ships it (warm-started
                   from ``naive``). This is the product's real behaviour.
 ``cpsat_ws2opt``  ``plan_optimized`` warm-started from ``greedy2opt`` instead,

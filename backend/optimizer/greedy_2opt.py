@@ -1,6 +1,6 @@
 """Strong heuristic baseline: greedy nearest-qualified + 2-opt local search.
 
-``baseline.plan_baseline`` is deliberately naive — it appends each job to the
+``baseline.plan_baseline`` is deliberately naive. It appends each job to the
 end of the nearest qualified technician's route and never revisits the decision.
 That is a weak foil. A real dispatcher (or ten lines of Excel VBA) does better:
 they re-order each technician's day so the driving makes sense and the tight
@@ -11,17 +11,17 @@ beat if the claimed improvement is going to mean anything.
 
 Algorithm
 ---------
-1. **Construct** — identical greedy nearest-qualified sweep as ``plan_baseline``
+1. **Construct**: identical greedy nearest-qualified sweep as ``plan_baseline``
    (priority ascending, then tightest SLA), so both planners start from the
    same place and the delta isolates the improvement pass.
-2. **Improve** — repeat until nothing changes:
+2. **Improve**: repeat until nothing changes:
    a. *2-opt* on every technician's route. Reverse each segment ``[i..j]`` of
       the closed tour ``home -> jobs -> home`` and keep the reversal if it
       lowers route cost. Cost is the operational cost, not raw distance:
       ``w_travel * travel + w_sla * breaches + w_overtime * overtime_minutes``.
       Re-ordering is re-simulated from ``shift_start``, so a move that shortens
       the drive but pushes a job past its deadline is correctly rejected.
-   b. *Re-insertion* — 2-opt frees minutes, so try every still-unassigned job at
+   b. *Re-insertion*: 2-opt frees minutes, so try every still-unassigned job at
       every feasible position in every qualified technician's route and take the
       insertion with the best objective gain
       (``priority_reward(job) - delta_cost``). Without this the freed capacity
@@ -32,7 +32,7 @@ parts, shift end plus overtime cap), and the scoring uses the same weights and
 the same travel accounting as ``metrics.compute_objective`` (including the
 return-to-home leg), so all three planners are measured on one yardstick.
 
-Pure Python. Imports nothing beyond the domain dataclasses — no solver, no web
+Pure Python. Imports nothing beyond the domain dataclasses. No solver, no web
 framework, no database.
 """
 

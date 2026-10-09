@@ -84,10 +84,10 @@ function buildBrief(r: OptimizeResult) {
     }
   }
 
-  // Overtime leverage.
+  // Overtime.
   if (o.overtime_hours > 0) {
     recommendations.push(
-      `Overtime is leverage, not waste: ${o.overtime_hours} hours of overtime keeps higher-priority jobs inside their SLA windows. Disabling it (see the Scenario Simulator) pushes more work past deadline.`
+      `Overtime is worth it here: ${o.overtime_hours} hours of overtime keeps higher-priority jobs inside their SLA windows. Disabling it (see the Scenario Simulator) pushes more work past deadline.`
     );
   }
 
