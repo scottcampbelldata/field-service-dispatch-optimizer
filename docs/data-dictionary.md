@@ -3,7 +3,7 @@
 All data is synthetic and reproducible from a seeded generator
 (`backend/app/generator.py`, default `seed=42`). Time is integer minutes from the
 start of the operating day (e.g. `480` = 08:00). Coordinates are **real lat/long**
-within the Dallas–Fort Worth metro (`x` = longitude, `y` = latitude) — the data is
+within the Dallas-Fort Worth metro (`x` = longitude, `y` = latitude). The data is
 synthetic, only the coordinate space is real. Travel time defaults to haversine
 (great-circle) distance × speed factor × traffic multiplier, or real road
 durations when a routing provider is configured (see `backend/app/routing.py`).
@@ -86,8 +86,8 @@ Per-run metrics are stored here so the analytical views need no route math.
 
 ## Analytical views (`backend/sql/analytical_views.sql`)
 
-- **`v_run_metrics`** — one-row scorecard per run (the API reads this for the
+- **`v_run_metrics`**: one-row scorecard per run (the API reads this for the
   comparison page).
-- **`v_run_utilization`** — busy minutes and utilization % per technician per run.
-- **`v_skill_pain`** — unassigned + breached demand per skill per run; the
+- **`v_run_utilization`**: busy minutes and utilization % per technician per run.
+- **`v_skill_pain`**: unassigned + breached demand per skill per run; the
   highest-pain row is the run's bottleneck skill.

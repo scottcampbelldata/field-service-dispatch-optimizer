@@ -33,7 +33,7 @@
 
 ## Layering
 
-The system is deliberately split so the hard part — the optimizer — is isolated
+The system is deliberately split so the hard part, the optimizer, is isolated
 and fully testable.
 
 - **Optimizer core** (`backend/optimizer/`) is pure Python. It imports no web
@@ -54,7 +54,7 @@ and fully testable.
   Dispatch Board, Optimizer Results, Baseline vs Optimized, Constraint Explorer,
   Marginal Value of Capacity, Scenario Simulator, and Executive Summary.
 - **Capacity analysis** (`backend/app/sweep_service.py`) sweeps crew size through
-  the optimizer to chart the decision frontier — the marginal value of each added
+  the optimizer to chart the decision frontier: the marginal value of each added
   technician and the hire-vs-overtime trade-off. Reuses the engine; nothing persisted.
 
 ## Request flow for `POST /api/optimize`

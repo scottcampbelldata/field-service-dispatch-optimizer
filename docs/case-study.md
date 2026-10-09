@@ -5,16 +5,16 @@ typical day the dispatcher faces more work than the crews can finish: **12
 technicians, 110 jobs, 6 skills**, hard SLA deadlines, travel between sites,
 fixed shifts, limited overtime, and some jobs blocked on parts.
 
-The question is not "what happened?" It is **"what should we do next?"**
+The question is **"what should we do next?"**
 
 ## The two plans
 
 Both plans see the same technicians, jobs, and constraints. Only the planning
 differs.
 
-- **Manual baseline** — the common-sense rule: highest priority first, nearest
+- **Manual baseline**: the common-sense rule, highest priority first, nearest
   qualified technician, no global trade-offs.
-- **Optimized** — OR-Tools CP-SAT, warm-started from the baseline, minimizing a
+- **Optimized**: OR-Tools CP-SAT, warm-started from the baseline, minimizing a
   weighted objective over completion, travel, SLA breaches, and overtime.
 
 ## Result across 200 randomized scenarios
@@ -54,10 +54,10 @@ per-scenario verdicts shift across runs. Only the distribution is meaningful.
 - **The bottleneck is a skill, not headcount.** The "executive read" surfaces the
   skill with the most unmet and late demand. Hiring or cross-training there beats
   adding general headcount.
-- **Overtime is leverage, not waste — up to a point.** A small overtime budget
+- **A little overtime goes a long way.** A small overtime budget
   prevents a disproportionate number of SLA breaches; the model finds the knee.
 - **Some low-value jobs should be deferred.** Protecting critical SLAs sometimes
-  means consciously dropping low-priority work — the optimizer makes that
+  means dropping low-priority work on purpose. The optimizer makes that
   trade-off explicit and labels every unassigned job with a reason.
 
 ## Try the scenarios

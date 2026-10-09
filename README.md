@@ -4,51 +4,48 @@
 ![Python](https://img.shields.io/badge/python-3.12-3776AB?logo=python&logoColor=white)
 ![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs)
 ![Solver](https://img.shields.io/badge/solver-OR--Tools%20CP--SAT-22d3ee)
-![Tests](https://img.shields.io/badge/tests-61%20passing-34d399)
 ![License](https://img.shields.io/badge/license-MIT-64748b)
 
-A live operations-planning system that assigns technicians to service jobs under
-real constraints — skills, travel, shift length, SLA deadlines, priority, job
-duration, overtime, and parts — then compares an **OR-Tools CP-SAT optimized
-plan** against a naive **manual dispatch baseline** to show measurable
-operational impact.
+A dispatch planner that assigns technicians to service jobs while respecting
+skills, travel, shift length, SLA deadlines, priority, job duration, overtime,
+and parts. It compares an **OR-Tools CP-SAT plan** against simpler
+**manual-style dispatch baselines** and shows what changes.
 
-This project doesn't just report on a business. **It makes a decision:** given
-limited people, time, travel, skills, and SLA risk, what should we do next?
+The question it answers: given limited people, time, travel, skills, and SLA
+risk, what should the dispatcher do next?
 
 > Synthetic domain: **Atlas Field Services**, a commercial-facilities maintenance
-> company. No proprietary or employer data is used — the dataset is fully
+> company. No proprietary or employer data is used. The dataset is fully
 > synthetic and reproducible from a seeded generator.
 
-<!-- Update these once deployed -->
 * Live demo: https://dispatch.scottcampbell.io
 * Live API: https://dispatch-api.scottcampbell.io
 * API docs: https://dispatch-api.scottcampbell.io/docs
 
 ## Screenshots
 
-### Light & dark — system-aware theming
+### Light and dark theme
 ![Light mode](screenshots/light-mode.png)
 
-### Dispatch Board — scenario controls, service region, backlog
+### Dispatch Board
 ![Dispatch Board](screenshots/dispatch-board.png)
 
-### Baseline vs Optimized — the decision, quantified
+### Baseline vs Optimized
 ![Baseline vs Optimized](screenshots/baseline-vs-optimized.png)
 
-### Optimizer Results — recommended routes and timing
+### Optimizer Results
 ![Optimizer Results](screenshots/optimizer-results.png)
 
-### Constraint Explorer — why each decision was made
+### Constraint Explorer
 ![Constraint Explorer](screenshots/constraint-explorer.png)
 
-### Marginal Value of Capacity — the decision frontier
+### Marginal Value of Capacity
 ![Marginal Value of Capacity](screenshots/marginal-value-capacity.png)
 
-### Scenario Simulator — inject chaos and re-solve
+### Scenario Simulator
 ![Scenario Simulator](screenshots/scenario-simulator.png)
 
-### Executive Summary — the plan in management language
+### Executive Summary
 ![Executive Summary](screenshots/executive-summary.png)
 
 ## The comparison
@@ -93,31 +90,31 @@ Raw per-scenario rows are committed under `backend/experiments/results/`.
 
 See [docs/case-study.md](docs/case-study.md).
 
-## Reviewer path
+## Where to look
 
-If you're reviewing quickly:
+If you only have a few minutes:
 
 1. Open the live Dispatch Board, adjust a slider, and click **Optimize Schedule**.
-2. Read the **Baseline vs Optimized** page — every click is a real CP-SAT solve.
+2. Read the **Baseline vs Optimized** page. Every click runs a real CP-SAT solve.
 3. Skim the model: [`backend/optimizer/cp_sat_model.py`](backend/optimizer/cp_sat_model.py)
    and [docs/optimization-model.md](docs/optimization-model.md).
 4. Skim the baseline foil: [`backend/optimizer/baseline.py`](backend/optimizer/baseline.py).
 5. Check the SQL reporting layer: [`backend/sql/analytical_views.sql`](backend/sql/analytical_views.sql).
 6. Check the test suite: [`backend/tests/`](backend/tests) (`./tasks.ps1 test`).
 
-## What it shows
+## What's in it
 
-- **A real optimizer**, not a heuristic dressed up as one: a VRPTW + assignment
-  model in OR-Tools CP-SAT, with a bounded live solve.
-- **An honest comparison**: the baseline obeys the same feasibility rules, so the
+- **The optimizer**: a VRPTW + assignment model in OR-Tools CP-SAT, with a
+  time-limited live solve.
+- **A fair comparison**: the baseline obeys the same feasibility rules, so the
   delta is planning quality, not different assumptions.
 - **Decision support**: bottleneck-skill detection, overtime-vs-SLA trade-offs,
   and explicit, reason-coded deferrals.
 - **Full stack**: seeded synthetic data → SQL reporting views → API → dashboard.
 
-## Quickstart (local, zero infrastructure)
+## Quickstart (local)
 
-Local development uses a SQLite file — no database to install.
+Local development uses a SQLite file, so there's no database to install.
 
 ```powershell
 # Windows / PowerShell
@@ -151,31 +148,31 @@ Postgres (compose / production).
 
 ## Maps & routing (bring your own key)
 
-Sites and technicians are placed at real lat/long across the Dallas–Fort Worth
+Sites and technicians are placed at real lat/long across the Dallas-Fort Worth
 metro (still fully synthetic data) and rendered on a Leaflet map with keyless
 CartoDB tiles. Travel times come from a **pluggable provider** chosen with
 `ROUTING_PROVIDER`:
 
 | Provider | Setting | Key needed | Notes |
 |----------|---------|-----------|-------|
-| Haversine | `haversine` (default) | none | Great-circle distance. Free, offline, reproducible — powers the public demo. |
+| Haversine | `haversine` (default) | none | Great-circle distance. Free, offline, reproducible. Used by the public demo. |
 | OpenRouteService | `openrouteservice` | **your** `ORS_API_KEY` ([free signup](https://openrouteservice.org/dev/#/signup)) | Real road-network durations via the Matrix API. |
 | OSRM | `osrm` + `OSRM_BASE_URL` | none | Real road durations from a self-hosted or public OSRM server. |
 
 Two ways to set the provider:
 
-- **Server-side** via `.env` (below) — applies to everyone.
-- **In-app, per visitor** via the **Routing** gear in the header — pick a provider
+- **Server-side** via `.env` (below). Applies to everyone.
+- **In-app, per visitor** via the **Routing** gear in the header. Pick a provider
   and paste your own key; it is sent **per request for that browser session only**
   and never stored. This lets anyone try real road routing on the live demo
   without a key being configured on the server.
 
-The provider is resolved per request and **degrades gracefully**: if it is
+The provider is resolved per request and **falls back to haversine**: if it is
 unconfigured, over the point cap, or the API call fails, travel falls back to
 haversine and the active provider is reported in the optimize response and on the
-Results page. **No key ever lives in the repo** — copy `.env.example` to `.env`
+Results page. **No key is stored in the repo.** Copy `.env.example` to `.env`
 and set your own. The optimizer model is unchanged by the provider: travel is
-resolved behind a single seam (`Instance.travel`), and the CP-SAT model already
+resolved in one place (`Instance.travel`), and the CP-SAT model already
 uses directional arcs, so real asymmetric road times drop in with no model
 changes.
 
@@ -208,7 +205,7 @@ deploy/        systemd units, nginx, runbook
 ## Testing & CI
 
 ```bash
-pytest -q                       # 61 tests
+pytest -q                       # tests
 ruff check backend data-generator   # lint
 ```
 

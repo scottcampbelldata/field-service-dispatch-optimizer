@@ -8,10 +8,10 @@ solved with Google OR-Tools **CP-SAT**.
 
 For each feasible `(technician, job)` pair:
 
-- `visit[t, j]` — boolean, 1 if technician `t` performs job `j`.
-- `start[t, j]` — integer start minute, bounded to `[shift_start, horizon − duration]`.
-- `breach[t, j]` — boolean, 1 if the job finishes after its SLA deadline.
-- `overtime[t, j]` — integer overtime minutes used by the assignment.
+- `visit[t, j]`: boolean, 1 if technician `t` performs job `j`.
+- `start[t, j]`: integer start minute, bounded to `[shift_start, horizon − duration]`.
+- `breach[t, j]`: boolean, 1 if the job finishes after its SLA deadline.
+- `overtime[t, j]`: integer overtime minutes used by the assignment.
 
 Per technician, a routing **circuit** is built over `{home} ∪ candidate jobs`
 using `AddCircuit`. Self-loop arcs make a node optional (a job not visited by
@@ -20,7 +20,7 @@ stops.
 
 ## Constraints
 
-- **Assignment:** `Σ_t visit[t, j] ≤ 1` — each job is done at most once.
+- **Assignment:** `Σ_t visit[t, j] ≤ 1`, so each job is done at most once.
 - **Skill + certification:** variables only exist for technicians certified in
   the job's required skill.
 - **Parts:** a job needing an unavailable part is never a candidate.
@@ -29,7 +29,7 @@ stops.
   technician is eligible.
 - **Travel sequencing:** for an active arc `i → k`, `start[k] ≥ end[i] +
   travel(i, k)`.
-- **SLA:** soft by default — `end ≤ deadline` is enforced only when the job is
+- **SLA:** soft by default. `end ≤ deadline` is enforced only when the job is
   visited and not flagged as a breach, so a late visit forces `breach = 1`.
   Under **strict** strictness, top-priority (P1) SLAs become hard constraints.
 
@@ -46,7 +46,7 @@ Maximize:
 
 `priority_reward = w_completed · (5 − priority)`, so a P1 job is worth 4× the
 base reward and a P4 job 1×. The default `w_completed` is tuned so even the
-lowest-priority reward exceeds an SLA-breach penalty — completing work dominates,
+lowest-priority reward exceeds an SLA-breach penalty, so completing work dominates,
 and the optimizer improves quality without sacrificing throughput.
 
 The UI sliders feed these weights directly: *traffic penalty* scales both the
@@ -77,5 +77,5 @@ Two techniques make an 8-second live solve reliable:
 The "manual dispatch" baseline is intentionally naive: sort jobs by priority,
 then SLA deadline, and assign each to the nearest qualified technician who can
 still fit it. No lookahead, no global trade-offs. It obeys the *same* feasibility
-rules as CP-SAT, so the comparison isolates planning quality — not different
+rules as CP-SAT, so the comparison isolates planning quality rather than different
 assumptions.
