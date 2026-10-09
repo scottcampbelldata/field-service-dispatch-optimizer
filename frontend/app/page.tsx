@@ -114,7 +114,7 @@ function Stat({ label, value }: { label: string; value: number | null }) {
   return (
     <div className="panel p-4">
       <div className="text-xs uppercase tracking-wide" style={{ color: "var(--muted)" }}>{label}</div>
-      <div className="mt-1 text-3xl font-semibold mono">{value === null ? "—" : value}</div>
+      <div className="mt-1 text-3xl font-semibold mono">{value === null ? "-" : value}</div>
     </div>
   );
 }

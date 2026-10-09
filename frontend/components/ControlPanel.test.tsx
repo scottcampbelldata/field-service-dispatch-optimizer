@@ -97,8 +97,8 @@ describe("ControlPanel", () => {
   it("shows em dashes and disables sliders while workload is missing", () => {
     render(<ControlPanel />);
 
-    expect(rowValue("Technicians available")).toHaveTextContent("—");
-    expect(rowValue("Jobs in backlog")).toHaveTextContent("—");
+    expect(rowValue("Technicians available")).toHaveTextContent("-");
+    expect(rowValue("Jobs in backlog")).toHaveTextContent("-");
     expect(rowSlider("Technicians available")).toBeDisabled();
     expect(rowSlider("Jobs in backlog")).toBeDisabled();
     expect(screen.getByRole("button", { name: "reset" })).toBeDisabled();

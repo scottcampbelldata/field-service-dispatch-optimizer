@@ -87,7 +87,7 @@ describe("BoardPage", () => {
 
     for (const label of ["Technicians on shift", "Jobs in backlog", "Skill types"]) {
       const value = statValue(label);
-      expect(value).toHaveTextContent("—");
+      expect(value).toHaveTextContent("-");
       expect(value).not.toHaveTextContent("0");
     }
   });

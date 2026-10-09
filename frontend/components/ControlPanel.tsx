@@ -26,7 +26,7 @@ export function ControlPanel() {
   const { workload, params, setParams, runOptimize, loading } = useDispatch();
   const router = useRouter();
   const ready = workload !== null;
-  // Dummy 4 / 20 keep range DOM valid while loading; Row shows "—" instead.
+  // Dummy 4 / 20 keep range DOM valid while loading; Row shows "-" instead.
   const maxTechs = ready ? workload.technicians.length : 4;
   const maxJobs = ready ? workload.jobs.length : 20;
   const techs = ready ? (params.technician_count ?? maxTechs) : 4;
@@ -69,13 +69,13 @@ export function ControlPanel() {
         </button>
       </div>
 
-      <Row label="Technicians available" value={ready ? `${techs}` : "—"}>
+      <Row label="Technicians available" value={ready ? `${techs}` : "-"}>
         <input type="range" min={4} max={maxTechs} value={techs} disabled={!ready}
           onChange={(e) => setParams({ technician_count: +e.target.value })}
           className="w-full" />
       </Row>
 
-      <Row label="Jobs in backlog" value={ready ? `${jobs}` : "—"}>
+      <Row label="Jobs in backlog" value={ready ? `${jobs}` : "-"}>
         <input type="range" min={20} max={maxJobs} value={jobs} disabled={!ready}
           onChange={(e) => setParams({ job_count: +e.target.value })}
           className="w-full" />
