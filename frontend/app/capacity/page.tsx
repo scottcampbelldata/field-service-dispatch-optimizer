@@ -46,13 +46,13 @@ export default function CapacityPage() {
 
       <div className="panel p-4 flex flex-wrap items-end gap-4">
         <Control label="Points">
-          <select value={cfg.steps} onChange={(e) => setCfg({ ...cfg, steps: +e.target.value })}
+          <select aria-label="Points" value={cfg.steps} onChange={(e) => setCfg({ ...cfg, steps: +e.target.value })}
             className="rounded-md px-2 py-1.5 text-sm" style={selStyle}>
             {[4, 5, 6, 7].map((n) => <option key={n} value={n}>{n}</option>)}
           </select>
         </Control>
         <Control label="Seconds / point">
-          <select value={cfg.per_point_seconds} onChange={(e) => setCfg({ ...cfg, per_point_seconds: +e.target.value })}
+          <select aria-label="Seconds per point" value={cfg.per_point_seconds} onChange={(e) => setCfg({ ...cfg, per_point_seconds: +e.target.value })}
             className="rounded-md px-2 py-1.5 text-sm" style={selStyle}>
             {[2, 3, 4].map((n) => <option key={n} value={n}>{n}s</option>)}
           </select>

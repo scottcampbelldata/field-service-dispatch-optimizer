@@ -282,7 +282,7 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
             html: `<div class="route-stop${multi ? " multi" : ""}" style="background:${color}">${label}</div>`,
             iconSize: [20, 20], iconAnchor: [10, 10],
           });
-          const m = L.marker([first.y, first.x], { icon, pane: "stopPane" }).addTo(layer);
+          const m = L.marker([first.y, first.x], { icon, pane: "stopPane", title: multi ? `${ordered.length} stops at ${first.site_name}` : `Job ${first.job_id}, stop ${label}` }).addTo(layer);
           m.bindTooltip(multi ? `${ordered.length} stops · ${first.site_name}` : `#${first.job_id} · stop ${label}`,
             { direction: "top" });
           m.bindPopup(multi ? multiStopPopup(ordered, rt.tech_name, color) : stopPopup(first, rt.tech_name, color));
@@ -306,7 +306,7 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
         html: `<div style="width:16px;height:16px;background:${TECH_COLOR};transform:rotate(45deg);border:2px solid #fff;box-shadow:0 0 5px rgba(0,0,0,.55)"></div>`,
         iconSize: [16, 16], iconAnchor: [8, 8],
       });
-      const m = L.marker([t.home_y, t.home_x], { icon, pane: "techPane", riseOnHover: true }).addTo(layer);
+      const m = L.marker([t.home_y, t.home_x], { icon, pane: "techPane", riseOnHover: true, title: `${t.name} home base` }).addTo(layer);
       if (selectedTechName != null && t.name !== selectedTechName) m.setOpacity(0.25);
       m.bindTooltip(`${t.name}${hasRoutes ? "" : " · home base"}`, { direction: "top" });
       m.bindPopup(techPopup(t, stopsByTech.get(t.name)));

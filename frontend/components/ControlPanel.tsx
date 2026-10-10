@@ -70,19 +70,19 @@ export function ControlPanel() {
       </div>
 
       <Row label="Technicians available" value={ready ? `${techs}` : "-"}>
-        <input type="range" min={4} max={maxTechs} value={techs} disabled={!ready}
+        <input type="range" aria-label="Technicians available" min={4} max={maxTechs} value={techs} disabled={!ready}
           onChange={(e) => setParams({ technician_count: +e.target.value })}
           className="w-full" />
       </Row>
 
       <Row label="Jobs in backlog" value={ready ? `${jobs}` : "-"}>
-        <input type="range" min={20} max={maxJobs} value={jobs} disabled={!ready}
+        <input type="range" aria-label="Jobs in backlog" min={20} max={maxJobs} value={jobs} disabled={!ready}
           onChange={(e) => setParams({ job_count: +e.target.value })}
           className="w-full" />
       </Row>
 
       <Row label="Optimization goal">
-        <select value={params.optimization_goal} style={selectStyle}
+        <select aria-label="Optimization goal" value={params.optimization_goal} style={selectStyle}
           onChange={(e) => setParams({ optimization_goal: e.target.value as never })}
           className="w-full rounded-md px-2 py-1.5 text-sm">
           <option value="balanced">Balanced</option>
@@ -93,19 +93,19 @@ export function ControlPanel() {
       </Row>
 
       <Row label="Traffic penalty" value={`${params.traffic_penalty.toFixed(1)}×`}>
-        <input type="range" min={1} max={3} step={0.1} value={params.traffic_penalty}
+        <input type="range" aria-label="Traffic penalty" min={1} max={3} step={0.1} value={params.traffic_penalty}
           onChange={(e) => setParams({ traffic_penalty: +e.target.value })}
           className="w-full" />
       </Row>
 
       <Row label="Emergency rate" value={`${Math.round(params.emergency_rate * 100)}%`}>
-        <input type="range" min={0} max={0.5} step={0.05} value={params.emergency_rate}
+        <input type="range" aria-label="Emergency rate" min={0} max={0.5} step={0.05} value={params.emergency_rate}
           onChange={(e) => setParams({ emergency_rate: +e.target.value })}
           className="w-full" />
       </Row>
 
       <Row label="Skill shortage">
-        <select value={params.skill_shortage ?? ""} style={selectStyle}
+        <select aria-label="Skill shortage" value={params.skill_shortage ?? ""} style={selectStyle}
           onChange={(e) => setParams({ skill_shortage: e.target.value || null })}
           className="w-full rounded-md px-2 py-1.5 text-sm">
           <option value="">None</option>
@@ -144,7 +144,7 @@ export function ControlPanel() {
       </Row>
 
       <Row label="Solver time budget" value={`${params.max_solve_seconds}s`}>
-        <input type="range" min={3} max={15} step={1} value={params.max_solve_seconds}
+        <input type="range" aria-label="Solver time budget" min={3} max={15} step={1} value={params.max_solve_seconds}
           onChange={(e) => setParams({ max_solve_seconds: +e.target.value })}
           className="w-full" />
       </Row>
