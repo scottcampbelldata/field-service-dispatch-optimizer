@@ -6,6 +6,10 @@
 ![Solver](https://img.shields.io/badge/solver-OR--Tools%20CP--SAT-22d3ee)
 ![License](https://img.shields.io/badge/license-MIT-64748b)
 
+**A field service scheduling tool that plans technician routes with an optimizer and compares the plan against manual dispatching, using synthetic data.**
+
+Live at [dispatch.scottcampbell.io](https://dispatch.scottcampbell.io). More of my work is at [scottcampbell.io](https://scottcampbell.io).
+
 A dispatch planner that assigns technicians to service jobs while respecting
 skills, travel, shift length, SLA deadlines, priority, job duration, overtime,
 and parts. It compares an **OR-Tools CP-SAT plan** against simpler
