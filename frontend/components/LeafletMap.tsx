@@ -20,6 +20,8 @@ interface Props {
   technicians: MapTech[];
   jobs?: MapJob[];
   routes?: Route[];
+  /** Called once the default basemap has drawn its first full frame. */
+  onBasemapReady?: () => void;
 }
 
 const ROUTE_HUES = [180, 150, 95, 45, 20, 320, 265, 210, 120, 0, 60, 290];
@@ -117,8 +119,64 @@ function formatSeqRange(nums: number[]): string {
   return parts.join(",");
 }
 
+// OpenFreeMap style, fetched here rather than by MapLibre so a few filters
+// can be made null-safe. Some compare a feature property such as `rank` or
+// `ref_length` with a number, and features without that property log a
+// warning per tile. MapLibre already treats those as not matching; giving the
+// missing value a default on the failing side keeps that result, quietly.
+// Falls back to the style URL if the fetch fails.
+const FAIL_LOW = { "<": 1e9, "<=": 1e9, ">": -1e9, ">=": -1e9 } as const;
+async function loadStyle(name: string): Promise<unknown> {
+  const url = `https://tiles.openfreemap.org/styles/${name}`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return url;
+    const style = await res.json();
+    const fix = (node: unknown): unknown => {
+      if (!Array.isArray(node)) return node;
+      const [op, left, right] = node;
+      if (op in FAIL_LOW && node.length === 3 && typeof right === "number"
+        && Array.isArray(left) && left[0] === "get" && left.length === 2) {
+        return [op, ["coalesce", left, FAIL_LOW[op as keyof typeof FAIL_LOW]], right];
+      }
+      return node.map(fix);
+    };
+    for (const layer of style.layers ?? []) {
+      if (layer.filter) layer.filter = fix(layer.filter);
+    }
+    return style;
+  } catch {
+    return url;
+  }
+}
+
+// The MapLibre plugin queues a frame on zoom-transition end that reads its
+// Leaflet map; if the map was removed in between (leaving a page mid-zoom)
+// that read throws. Same steps as the plugin, skipped once the layer is gone.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function guardPluginAfterRemove(L: any) {
+  const proto = L.MaplibreGL?.prototype;
+  if (!proto || proto.__guarded) return;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  proto._transitionEnd = function (this: any) {
+    L.Util.requestAnimFrame(() => {
+      if (!this._map || !this._glMap) return;
+      const zoom = this._map.getZoom();
+      const center = this._map.getCenter();
+      const offset = this._map.latLngToContainerPoint(this._map.getBounds().getNorthWest());
+      this._resizeContainer();
+      L.DomUtil.setTransform(this._glMap._actualCanvas, offset, 1);
+      this._glMap.once("moveend", () => { if (this._map) this._zoomEnd(); });
+      this._glMap.jumpTo({ center, zoom: zoom - 1 });
+    });
+  };
+  proto.__guarded = true;
+}
+
 // Coordinates are [lon=x, lat=y]; Leaflet wants [lat, lon].
-export default function LeafletMap({ technicians, jobs, routes }: Props) {
+export default function LeafletMap({ technicians, jobs, routes, onBasemapReady }: Props) {
+  const readyCbRef = useRef(onBasemapReady);
+  useEffect(() => { readyCbRef.current = onBasemapReady; }, [onBasemapReady]);
   const elRef = useRef<HTMLDivElement>(null);
   const routesPanelRef = useRef<HTMLDivElement>(null);
   const legendRef = useRef<HTMLDivElement>(null);
@@ -130,7 +188,11 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
   const LRef = useRef<any>(null);
   const [ready, setReady] = useState(false);
   const [selected, setSelected] = useState<number | null>(null);
-  const [routesOpen, setRoutesOpen] = useState(true);
+  // On phones the legend and route list start folded so they do not cover
+  // the map. This component only renders in the browser (ssr: false).
+  const [narrow] = useState(() => window.matchMedia("(max-width: 639px)").matches);
+  const [routesOpen, setRoutesOpen] = useState(!narrow);
+  const [legendOpen, setLegendOpen] = useState(!narrow);
 
   useEffect(() => {
     let active = true;
@@ -157,43 +219,56 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
       // account or key), drawn with MapLibre inside Leaflet so markers,
       // clusters and routes stay as they are. MapLibre and its CSS are
       // imported here, so they only download once the map is mounted.
-      await Promise.all([
+      const [, , libertyStyle, darkStyle] = await Promise.all([
         import("maplibre-gl/dist/maplibre-gl.css"),
         import("@maplibre/maplibre-gl-leaflet"),
+        loadStyle("liberty"),
+        loadStyle("dark"),
       ]);
       if (!active) return;
+      guardPluginAfterRemove(L);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const gl = (style: string) => (L as any).maplibreGL({
-        style: `https://tiles.openfreemap.org/styles/${style}`,
-        // A fixed credit string, so the plugin does not swap in the
-        // tileset's own text after the style loads and shift the corner.
-        attributionControl: { customAttribution: ofmAttribution },
-      });
-      const streets = gl("liberty");
-      const dark = gl("dark");
-      // Satellite stays on Esri World Imagery, with Esri's place and boundary
-      // labels on top so the area stays readable. Both are keyless rasters.
-      const esriAttribution =
-        "Tiles &copy; Esri. Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community";
-      const satellite = L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-        { attribution: esriAttribution, maxZoom: 19 },
-      );
-      const labels = L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
-        { attribution: "", maxZoom: 19, pane: "shadowPane" },
-      );
-      const satelliteHybrid = L.layerGroup([satellite, labels]);
+      const gl = (style: any) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const layer = (L as any).maplibreGL({
+          style,
+          // A fixed credit string, so the plugin does not swap in the
+          // tileset's own text after the style loads and shift the corner.
+          attributionControl: { customAttribution: ofmAttribution },
+        });
+        // A few icons named in the styles are not in their sprite sheets;
+        // stand in a blank image so MapLibre does not warn about each one.
+        layer.on("add", () => {
+          const glMap = layer.getMaplibreMap?.();
+          glMap?.on("styleimagemissing", (e: { id: string }) => {
+            if (!glMap.hasImage(e.id)) glMap.addImage(e.id, { width: 1, height: 1, data: new Uint8Array(4) });
+          });
+        });
+        return layer;
+      };
+      const streets = gl(libertyStyle);
+      const dark = gl(darkStyle);
       // Default basemap follows the app theme (Dark tiles in dark mode).
       const isDark = document.documentElement.classList.contains("dark");
-      (isDark ? dark : streets).addTo(map);
+      const base = isDark ? dark : streets;
+      base.addTo(map);
       switcher.addBaseLayer(streets, "Streets");
-      switcher.addBaseLayer(satelliteHybrid, "Satellite");
       switcher.addBaseLayer(dark, "Dark");
       // The base layers carry the same credit now, so drop the placeholder.
       map.attributionControl.removeAttribution(ofmAttribution);
 
       map.setView([32.85, -96.75], 11);
+
+      // Tell the wrapper when the basemap has finished drawing, so it can
+      // fade out the static preview. A timer covers a stalled tile server.
+      let announced = false;
+      const announce = () => {
+        if (announced || !active) return;
+        announced = true;
+        readyCbRef.current?.();
+      };
+      base.getMaplibreMap?.()?.once("idle", announce);
+      setTimeout(announce, 6000);
 
       // Dedicated high-z pane so technician bases always sit above job markers
       // and clusters (their home bases share coordinates with job sites, so
@@ -219,7 +294,15 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
     return () => {
       active = false;
       if (ro) ro.disconnect();
-      if (mapRef.current) mapRef.current.remove();
+      const map = mapRef.current;
+      if (map) {
+        // Stop any running fitBounds animation and take the MapLibre layers
+        // off first, so nothing queued by them runs against a removed map.
+        map.stop();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        map.eachLayer((l: any) => { if (l.getMaplibreMap) map.removeLayer(l); });
+        map.remove();
+      }
       mapRef.current = null;
       layerRef.current = null;
     };
@@ -406,19 +489,29 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
 
       <div ref={legendRef} className="absolute z-[500] left-2 bottom-2 rounded-md px-2.5 py-2 text-[11px] space-y-1"
         style={{ background: "color-mix(in srgb, var(--surface-1) 90%, transparent)", border: "1px solid var(--border)", color: "var(--text-muted)", backdropFilter: "blur(4px)" }}>
-        <LegendRow color="#f43f5e" label="P1 critical" />
-        <LegendRow color="#f59e0b" label="P2 high" />
-        <LegendRow color="#38bdf8" label="P3 normal" />
-        <LegendRow color="#94a3b8" label="P4 low" />
-        <div style={{ borderTop: "1px solid var(--border)", margin: "3px 0" }} />
-        <div className="flex items-center gap-1.5">
-          <span style={{ width: 10, height: 10, background: TECH_COLOR, transform: "rotate(45deg)", display: "inline-block", border: "1px solid #fff" }} />
-          tech home base
-        </div>
-        {routes?.length ? (
-          <div className="pt-1" style={{ color: "var(--accent)" }}>click a route or list row to isolate</div>
-        ) : (
-          <div className="pt-1" style={{ color: "var(--text-faint)" }}>backlog by site location · optimize to assign</div>
+        {narrow && (
+          <button type="button" onClick={() => setLegendOpen((o) => !o)} aria-expanded={legendOpen}
+            className="flex items-center gap-1 font-medium" style={{ color: "var(--text)" }}>
+            Legend <span aria-hidden>{legendOpen ? "▾" : "▸"}</span>
+          </button>
+        )}
+        {legendOpen && (
+          <>
+            <LegendRow color="#f43f5e" label="P1 critical" />
+            <LegendRow color="#f59e0b" label="P2 high" />
+            <LegendRow color="#38bdf8" label="P3 normal" />
+            <LegendRow color="#94a3b8" label="P4 low" />
+            <div style={{ borderTop: "1px solid var(--border)", margin: "3px 0" }} />
+            <div className="flex items-center gap-1.5">
+              <span style={{ width: 10, height: 10, background: TECH_COLOR, transform: "rotate(45deg)", display: "inline-block", border: "1px solid #fff" }} />
+              tech home base
+            </div>
+            {routes?.length ? (
+              <div className="pt-1" style={{ color: "var(--accent)" }}>click a route or list row to isolate</div>
+            ) : (
+              <div className="pt-1" style={{ color: "var(--text-faint)" }}>backlog by site location · optimize to assign</div>
+            )}
+          </>
         )}
       </div>
     </div>

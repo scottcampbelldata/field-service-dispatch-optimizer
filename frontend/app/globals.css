@@ -192,3 +192,30 @@ input[type="range"] { accent-color: var(--accent); }
   box-shadow: 0 0 8px rgba(0,0,0,.5);
 }
 .marker-cluster, .marker-cluster div { background: transparent !important; }
+
+/* Static map preview: show the still that matches the active theme, and
+   place the credit where Leaflet puts it on the live map. */
+.map-preview-dark { display: none; }
+.dark .map-preview-light { display: none; }
+.dark .map-preview-dark { display: block; }
+/* Mirrors Leaflet's attribution control, whose CSS only loads with the map. */
+.map-preview-attribution {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  padding: 0 5px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: #333;
+  background: rgba(255, 255, 255, 0.8);
+}
+.map-preview-attribution a { color: #0078a8; text-decoration: none; }
+.map-preview-attribution a:hover, .map-preview-attribution a:focus { text-decoration: underline; }
+.map-preview-flag { display: inline; vertical-align: baseline; width: 1em; height: 0.6669em; }
+
+/* Phones: a smaller map credit so it covers less of the map. */
+@media (max-width: 639px) {
+  .leaflet-container .leaflet-control-attribution,
+  .map-preview-attribution { font-size: 10px; }
+}
