@@ -28,11 +28,7 @@ export function Header() {
             F
           </div>
           <div className="leading-tight">
-            {path === "/" ? (
-              <h1 className="font-semibold text-base">Field Service Dispatch</h1>
-            ) : (
-              <div className="font-semibold">Field Service Dispatch</div>
-            )}
+            <div className="font-semibold">Field Service Dispatch</div>
             <div className="text-xs" style={{ color: "var(--muted)" }}>
               Optimizer
             </div>
@@ -61,7 +57,7 @@ export function Header() {
 
         <div className="ml-auto text-xs flex items-center gap-2" style={{ color: "var(--muted)" }}>
           <span
-            className="px-2 py-1 rounded-md mono hidden 2xl:inline"
+            className="px-2 py-1 rounded-md mono hidden"
             style={{ background: "var(--surface-2)", border: "1px solid var(--border)" }}
           >
             OR-Tools CP-SAT

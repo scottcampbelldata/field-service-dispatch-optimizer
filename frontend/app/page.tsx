@@ -44,6 +44,9 @@ export default function BoardPage() {
 
   return (
     <div className="mx-auto max-w-7xl p-5 grid grid-cols-1 gap-5 lg:grid-cols-[330px_1fr]">
+      <h1 className="text-xl font-semibold lg:col-span-2">
+        Schedule 12 technicians against 110 jobs and SLA deadlines
+      </h1>
       <ControlPanel />
 
       <div className="space-y-5">
