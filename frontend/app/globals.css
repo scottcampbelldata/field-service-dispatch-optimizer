@@ -16,7 +16,7 @@
   --accent: #146a55;
   --accent-strong: #0c5341;
   --accent-contrast: #ffffff;
-  --good: #2f7d45;
+  --good: #29723f;
   --warn: #96610e;
   --bad: #a93b4e;
   --ring: color-mix(in srgb, var(--accent) 45%, transparent);
