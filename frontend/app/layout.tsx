@@ -18,6 +18,7 @@ export const metadata: Metadata = {
   description:
     "Field service dispatch optimization demo. OR-Tools CP-SAT schedules technicians by skill, SLA window, travel and shift capacity, compared against a manual dispatch baseline.",
   applicationName: "Field Service Dispatch Optimizer",
+  alternates: { canonical: "/" },
   authors: [{ name: "Scott Campbell", url: "https://scottcampbell.io/" }],
   openGraph: {
     type: "website",
@@ -91,7 +92,7 @@ export default function RootLayout({
               <div className="mx-auto max-w-7xl px-5 py-4 text-xs flex flex-wrap items-center justify-between gap-2"
                 style={{ color: "var(--muted)" }}>
                 <span>
-                  Synthetic Dallas-Fort Worth field-service dataset - no real customer data.
+                  Synthetic Dallas-Fort Worth field-service dataset. No real customer data.
                 </span>
                 <span>
                   OR-Tools CP-SAT optimization · technicians, skills, SLA windows, travel, and shift

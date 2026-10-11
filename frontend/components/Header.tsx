@@ -25,24 +25,28 @@ export function Header() {
             className="h-8 w-8 rounded-md grid place-items-center font-bold"
             style={{ background: "var(--accent)", color: "var(--accent-contrast)" }}
           >
-            A
+            F
           </div>
           <div className="leading-tight">
-            <div className="font-semibold">Atlas Field Services</div>
+            {path === "/" ? (
+              <h1 className="font-semibold text-base">Field Service Dispatch</h1>
+            ) : (
+              <div className="font-semibold">Field Service Dispatch</div>
+            )}
             <div className="text-xs" style={{ color: "var(--muted)" }}>
-              Dispatch Optimizer
+              Optimizer
             </div>
           </div>
         </div>
 
-        <nav className="flex items-center gap-1 ml-4">
+        <nav aria-label="Main navigation" className="order-last w-full sm:order-none sm:w-auto sm:ml-4 flex items-center gap-1 overflow-x-auto">
           {LINKS.map((l) => {
             const active = path === l.href;
             return (
               <Link
                 key={l.href}
                 href={l.href}
-                className="px-3 py-1.5 rounded-md text-sm transition-colors"
+                className="px-3 py-1.5 rounded-md text-sm transition-colors whitespace-nowrap"
                 style={{
                   background: active ? "var(--panel)" : "transparent",
                   color: active ? "var(--foreground)" : "var(--muted)",
@@ -57,7 +61,7 @@ export function Header() {
 
         <div className="ml-auto text-xs flex items-center gap-2" style={{ color: "var(--muted)" }}>
           <span
-            className="px-2 py-1 rounded-md mono hidden lg:inline"
+            className="px-2 py-1 rounded-md mono hidden 2xl:inline"
             style={{ background: "var(--surface-2)", border: "1px solid var(--border)" }}
           >
             OR-Tools CP-SAT
