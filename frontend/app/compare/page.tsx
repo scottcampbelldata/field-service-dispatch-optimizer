@@ -128,7 +128,7 @@ export default function ComparePage() {
         <MetricCard label="Unassigned" value={o.unassigned} delta={c.unassigned_delta} betterWhenLower />
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <div className="panel p-5">
           <h2 className="font-semibold mb-4">Before / after</h2>
           <BeforeAfterChart rows={[
@@ -171,7 +171,7 @@ export default function ComparePage() {
         <UtilizationChart baseline={result.baseline.utilization} optimized={result.optimized.utilization} />
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[1fr_360px]">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_360px]">
         <div className="panel p-4">
           <h2 className="font-semibold mb-3">Optimized routes</h2>
           <div className="aspect-[16/10] w-full">

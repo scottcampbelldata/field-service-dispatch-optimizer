@@ -31,7 +31,7 @@ export default function ConstraintsPage() {
 
       <ModelConstraints />
 
-      <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_1fr]">
         <div className="panel p-5 space-y-4">
           <h2 className="font-semibold">Capacity vs demand</h2>
           <div>

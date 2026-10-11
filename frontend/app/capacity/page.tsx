@@ -90,7 +90,7 @@ export default function CapacityPage() {
 
       {result && !busy && (
         <>
-          <div className="grid gap-5 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
             <div className="panel p-5">
               <h2 className="font-semibold mb-2">Jobs completed vs crew size</h2>
               <ThemedLineChart data={lineData} xKey="techs" yLabel="Jobs"

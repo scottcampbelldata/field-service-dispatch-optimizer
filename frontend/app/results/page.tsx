@@ -76,7 +76,7 @@ export default function ResultsPage() {
         <Legend />
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <StopTable title={`Late jobs - SLA breached (${lateStops.length})`} stops={lateStops} kind="late" />
         <UnassignedTable />
       </div>
