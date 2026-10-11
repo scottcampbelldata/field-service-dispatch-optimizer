@@ -1,6 +1,6 @@
-# Case study: a day at Atlas Field Services
+# Case study: a day at Field Service Dispatch
 
-Atlas Field Services runs commercial-facilities maintenance across a region. On a
+Field Service Dispatch runs commercial-facilities maintenance across a region. On a
 typical day the dispatcher faces more work than the crews can finish: **12
 technicians, 110 jobs, 6 skills**, hard SLA deadlines, travel between sites,
 fixed shifts, limited overtime, and some jobs blocked on parts.

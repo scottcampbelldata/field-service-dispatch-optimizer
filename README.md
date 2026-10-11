@@ -18,7 +18,7 @@ and parts. It compares an **OR-Tools CP-SAT plan** against simpler
 The question it answers: given limited people, time, travel, skills, and SLA
 risk, what should the dispatcher do next?
 
-> Synthetic domain: **Atlas Field Services**, a commercial-facilities maintenance
+> Synthetic domain: **Field Service Dispatch**, a commercial-facilities maintenance
 > company. No proprietary or employer data is used. The dataset is fully
 > synthetic and reproducible from a seeded generator.
 

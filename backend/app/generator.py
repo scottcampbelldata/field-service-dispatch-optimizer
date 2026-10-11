@@ -1,4 +1,4 @@
-"""Seeded synthetic data generator for Atlas Field Services.
+"""Seeded synthetic data generator for Field Service Dispatch.
 
 Produces one canonical, reproducible "day" as a domain ``Instance``: a roster of
 technicians, a set of customer sites at real lat/long across a metro service
