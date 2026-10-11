@@ -140,36 +140,58 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
       const L = (await import("leaflet")).default;
       await import("leaflet.markercluster");
       if (!active || !elRef.current || mapRef.current) return;
-      const map = L.map(elRef.current, { zoomControl: true });
+      const map = L.map(elRef.current, { zoomControl: true, maxZoom: 19 });
+      mapRef.current = map;
+      const ofmAttribution =
+        '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> ' +
+        '&copy; <a href="https://www.openmaptiles.org/" target="_blank" rel="noopener">OpenMapTiles</a> ' +
+        'Data from <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>';
+      // Credit and the layer switcher go in before the basemap arrives, so
+      // the bottom-right corner does not grow and shift once it loads.
+      map.attributionControl.addAttribution(ofmAttribution);
+      const switcher = L.control.layers(
+        {}, {}, { position: "bottomright", collapsed: true },
+      ).addTo(map);
 
-      // Free, no-key basemaps. Colorful "Streets" is the default; a switcher
-      // lets you flip to Satellite or the original Dark theme.
-      const streets = L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-        { attribution: "&copy; OpenStreetMap &copy; CARTO", subdomains: "abcd", maxZoom: 19 },
-      );
+      // Keyless vector basemaps from OpenFreeMap (OpenStreetMap data, no
+      // account or key), drawn with MapLibre inside Leaflet so markers,
+      // clusters and routes stay as they are. MapLibre and its CSS are
+      // imported here, so they only download once the map is mounted.
+      await Promise.all([
+        import("maplibre-gl/dist/maplibre-gl.css"),
+        import("@maplibre/maplibre-gl-leaflet"),
+      ]);
+      if (!active) return;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const gl = (style: string) => (L as any).maplibreGL({
+        style: `https://tiles.openfreemap.org/styles/${style}`,
+        // A fixed credit string, so the plugin does not swap in the
+        // tileset's own text after the style loads and shift the corner.
+        attributionControl: { customAttribution: ofmAttribution },
+      });
+      const streets = gl("liberty");
+      const dark = gl("dark");
+      // Satellite stays on Esri World Imagery, with Esri's place and boundary
+      // labels on top so the area stays readable. Both are keyless rasters.
+      const esriAttribution =
+        "Tiles &copy; Esri. Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community";
       const satellite = L.tileLayer(
         "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-        { attribution: "Tiles &copy; Esri", maxZoom: 19 },
+        { attribution: esriAttribution, maxZoom: 19 },
       );
       const labels = L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png",
-        { attribution: "", subdomains: "abcd", maxZoom: 19, pane: "shadowPane" },
+        "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+        { attribution: "", maxZoom: 19, pane: "shadowPane" },
       );
-      const dark = L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-        { attribution: "&copy; OpenStreetMap &copy; CARTO", subdomains: "abcd", maxZoom: 19 },
-      );
+      const satelliteHybrid = L.layerGroup([satellite, labels]);
       // Default basemap follows the app theme (Dark tiles in dark mode).
       const isDark = document.documentElement.classList.contains("dark");
       (isDark ? dark : streets).addTo(map);
-      // Pair street labels with satellite imagery so roads stay readable.
-      const satelliteHybrid = L.layerGroup([satellite, labels]);
-      L.control.layers(
-        { Streets: streets, Satellite: satelliteHybrid, Dark: dark },
-        {},
-        { position: "bottomright", collapsed: true },
-      ).addTo(map);
+      switcher.addBaseLayer(streets, "Streets");
+      switcher.addBaseLayer(satelliteHybrid, "Satellite");
+      switcher.addBaseLayer(dark, "Dark");
+      // The base layers carry the same credit now, so drop the placeholder.
+      map.attributionControl.removeAttribution(ofmAttribution);
 
       map.setView([32.85, -96.75], 11);
 
@@ -187,7 +209,6 @@ export default function LeafletMap({ technicians, jobs, routes }: Props) {
       const stopPane = map.createPane("stopPane");
       stopPane.style.zIndex = "630";
 
-      mapRef.current = map;
       layerRef.current = L.layerGroup().addTo(map);
       LRef.current = L;
       ro = new ResizeObserver(() => map.invalidateSize());
