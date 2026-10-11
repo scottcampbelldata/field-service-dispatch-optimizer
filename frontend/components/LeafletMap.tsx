@@ -487,11 +487,11 @@ export default function LeafletMap({ technicians, jobs, routes, onBasemapReady }
         </div>
       )}
 
-      <div ref={legendRef} className="absolute z-[500] left-2 bottom-2 rounded-md px-2.5 py-2 text-[11px] space-y-1"
+      <div ref={legendRef} className="absolute z-[500] left-2 bottom-9 sm:bottom-2 rounded-md px-2.5 py-2 text-[11px] space-y-1"
         style={{ background: "color-mix(in srgb, var(--surface-1) 90%, transparent)", border: "1px solid var(--border)", color: "var(--text-muted)", backdropFilter: "blur(4px)" }}>
         {narrow && (
           <button type="button" onClick={() => setLegendOpen((o) => !o)} aria-expanded={legendOpen}
-            className="flex items-center gap-1 font-medium" style={{ color: "var(--text)" }}>
+            className="flex min-h-[32px] items-center gap-1 px-2 -mx-2 font-medium" style={{ color: "var(--text)" }}>
             Legend <span aria-hidden>{legendOpen ? "▾" : "▸"}</span>
           </button>
         )}
