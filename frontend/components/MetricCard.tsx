@@ -19,7 +19,7 @@ export function MetricCard({ label, value, unit, delta, betterWhenLower, deltaSu
   }
   return (
     <div className="panel p-4">
-      <div className="text-xs uppercase tracking-wide" style={{ color: "var(--muted)" }}>
+      <div className="text-xs stat-label first-letter:uppercase" style={{ color: "var(--muted)" }}>
         {label}
       </div>
       <div className="mt-2 flex items-baseline gap-1">

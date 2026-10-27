@@ -18,35 +18,24 @@ const LINKS = [
 export function Header() {
   const path = usePathname();
   return (
-    <header className="border-b sticky top-0 z-50" style={{ borderColor: "var(--border)", background: "color-mix(in srgb, var(--surface-1) 88%, transparent)", backdropFilter: "blur(8px)" }}>
-      <div className="mx-auto max-w-7xl px-5 py-3 flex flex-wrap items-center gap-x-6 gap-y-2">
-        <div className="flex items-center gap-3">
-          <div
-            className="h-8 w-8 rounded-md grid place-items-center font-bold"
-            style={{ background: "var(--accent)", color: "var(--accent-contrast)" }}
-          >
-            F
-          </div>
-          <div className="leading-tight">
-            <div className="font-semibold">Field Service Dispatch</div>
-            <div className="text-xs" style={{ color: "var(--muted)" }}>
-              Optimizer
-            </div>
-          </div>
+    <div className="border-b" style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}>
+      <div className="mx-auto max-w-7xl px-5 py-2 flex flex-wrap items-center gap-x-6 gap-y-1">
+        <div className="text-base" style={{ fontFamily: "var(--font-display)", color: "var(--text)" }}>
+          Field Service Dispatch Optimizer
         </div>
 
-        <nav aria-label="Main navigation" className="order-last w-full sm:order-none sm:w-auto sm:ml-4 flex items-center gap-1 overflow-x-auto">
+        <nav aria-label="Main navigation" className="order-last w-full sm:order-none sm:w-auto flex items-center gap-1 overflow-x-auto">
           {LINKS.map((l) => {
             const active = path === l.href;
             return (
               <Link
                 key={l.href}
                 href={l.href}
-                className="px-3 py-1.5 rounded-md text-sm transition-colors whitespace-nowrap"
+                aria-current={active ? "page" : undefined}
+                className="px-2.5 py-2 text-sm transition-colors whitespace-nowrap"
                 style={{
-                  background: active ? "var(--panel)" : "transparent",
-                  color: active ? "var(--foreground)" : "var(--muted)",
-                  border: `1px solid ${active ? "var(--border)" : "transparent"}`,
+                  color: active ? "var(--text)" : "var(--muted)",
+                  borderBottom: `2px solid ${active ? "var(--accent)" : "transparent"}`,
                 }}
               >
                 {l.label}
@@ -56,16 +45,10 @@ export function Header() {
         </nav>
 
         <div className="ml-auto text-xs flex items-center gap-2" style={{ color: "var(--muted)" }}>
-          <span
-            className="px-2 py-1 rounded-md mono hidden"
-            style={{ background: "var(--surface-2)", border: "1px solid var(--border)" }}
-          >
-            OR-Tools CP-SAT
-          </span>
           <RoutingSettings />
           <ThemeToggle />
         </div>
       </div>
-    </header>
+    </div>
   );
 }

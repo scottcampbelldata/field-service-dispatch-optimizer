@@ -34,7 +34,7 @@ export default function SummaryPage() {
         <p className="text-lg leading-relaxed">{brief.headline}</p>
 
         <div>
-          <h2 className="text-sm uppercase tracking-wide mb-2" style={{ color: "var(--muted)" }}>
+          <h2 className="text-sm stat-label first-letter:uppercase mb-2" style={{ color: "var(--muted)" }}>
             Recommendations
           </h2>
           <ul className="space-y-2.5">
@@ -48,7 +48,7 @@ export default function SummaryPage() {
         </div>
 
         <div className="rounded-lg p-4" style={{ background: "var(--panel-2)", border: "1px solid var(--border)" }}>
-          <div className="text-sm uppercase tracking-wide mb-1" style={{ color: "var(--muted)" }}>
+          <div className="text-sm stat-label first-letter:uppercase mb-1" style={{ color: "var(--muted)" }}>
             Bottom line vs manual dispatch
           </div>
           <p className="leading-relaxed">{brief.bottomLine}</p>
@@ -78,8 +78,8 @@ function buildBrief(r: OptimizeResult) {
     if (sd) {
       recommendations.push(
         capPct <= 100
-          ? `The bottleneck is not headcount - raw capacity covers ${capPct}% of demand. It is ${sd.skill} availability: ${sd.certified_techs} certified technician(s) against ${sd.jobs} jobs, leaving ${sd.unassigned} unserved and ${sd.breaches} late. Prioritize hiring or cross-training in ${sd.skill}.`
-          : `Demand is ${capPct}% of available technician-hours - the day is over capacity. Adding crew or overtime, concentrated in ${sd.skill}, is the only way to clear the backlog.`
+          ? `The bottleneck is not headcount. Raw capacity covers ${capPct}% of demand. It is ${sd.skill} availability: ${sd.certified_techs} certified technician(s) against ${sd.jobs} jobs, leaving ${sd.unassigned} unserved and ${sd.breaches} late. Prioritize hiring or cross-training in ${sd.skill}.`
+          : `Demand is ${capPct}% of available technician-hours, so the day is over capacity. Adding crew or overtime, concentrated in ${sd.skill}, is the only way to clear the backlog.`
       );
     }
   }
@@ -95,7 +95,7 @@ function buildBrief(r: OptimizeResult) {
   const deferred = d.unassigned_by_reason.find((x) => x.reason === "unassigned_capacity")?.count ?? 0;
   if (deferred > 0) {
     recommendations.push(
-      `${deferred} low-priority job(s) are deliberately deferred to protect critical SLAs - a deliberate trade-off, not an oversight.`
+      `${deferred} low-priority job(s) are deliberately deferred to protect critical SLAs. That is a deliberate trade-off, not an oversight.`
     );
   }
 
@@ -110,14 +110,14 @@ function buildBrief(r: OptimizeResult) {
   }
 
   if (recommendations.length === 0) {
-    recommendations.push("The current plan is comfortably within capacity - no structural constraints are binding.");
+    recommendations.push("The current plan is comfortably within capacity. No structural constraints are binding.");
   }
 
   const bottomLine =
     `Versus manual dispatch on the same day: ${c.jobs_completed_delta >= 0 ? "+" : ""}${c.jobs_completed_delta} jobs completed, ` +
     `${-c.sla_breaches_delta} fewer SLA breaches, ` +
     `${c.travel_hours_delta <= 0 ? `${-c.travel_hours_delta}h less travel` : `${c.travel_hours_delta}h more travel`}, and ` +
-    `${c.overtime_hours_delta <= 0 ? `${-c.overtime_hours_delta}h less overtime` : `${c.overtime_hours_delta}h more overtime`} - the same people and trucks, planned better.`;
+    `${c.overtime_hours_delta <= 0 ? `${-c.overtime_hours_delta}h less overtime` : `${c.overtime_hours_delta}h more overtime`}: the same people and trucks, planned better.`;
 
   const costLine = r.cost
     ? ` At the modeled rates that is about $${Math.round(r.cost.savings_per_day).toLocaleString()} per day` +
@@ -130,7 +130,7 @@ function buildBrief(r: OptimizeResult) {
 function Kpi({ label, value }: { label: string; value: string }) {
   return (
     <div className="panel p-4">
-      <div className="text-xs uppercase tracking-wide" style={{ color: "var(--muted)" }}>{label}</div>
+      <div className="text-xs stat-label first-letter:uppercase" style={{ color: "var(--muted)" }}>{label}</div>
       <div className="mt-1 text-2xl font-semibold mono">{value}</div>
     </div>
   );
