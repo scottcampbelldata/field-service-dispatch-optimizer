@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import { ReportBand } from "@/components/ReportBand";
 import { ControlPanel } from "@/components/ControlPanel";
 import MapView from "@/components/MapView";
 import { useDispatch } from "@/app/providers";
@@ -44,9 +43,10 @@ export default function BoardPage() {
   }
 
   return (
-    <>
-    <ReportBand />
     <div className="mx-auto max-w-7xl p-5 grid grid-cols-1 gap-5 lg:grid-cols-[330px_1fr]">
+      <h1 className="text-xl font-semibold lg:col-span-2">
+        Schedule 12 technicians against 110 jobs and SLA deadlines
+      </h1>
       <ControlPanel />
 
       <div className="space-y-5">
@@ -110,14 +110,13 @@ export default function BoardPage() {
         </div>
       </div>
     </div>
-    </>
   );
 }
 
 function Stat({ label, value }: { label: string; value: number | null }) {
   return (
     <div className="panel p-4">
-      <div className="text-xs stat-label first-letter:uppercase" style={{ color: "var(--muted)" }}>{label}</div>
+      <div className="text-xs uppercase tracking-wide" style={{ color: "var(--muted)" }}>{label}</div>
       <div className="mt-1 text-3xl font-semibold mono">{value === null ? "-" : value}</div>
     </div>
   );

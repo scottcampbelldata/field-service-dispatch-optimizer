@@ -65,7 +65,7 @@ function makeWorkload(techs: number, jobs: number, skills: number): Workload {
 }
 
 function statValue(label: string) {
-  const labelEl = screen.getByText(label, { selector: ".stat-label" });
+  const labelEl = screen.getByText(label, { selector: ".uppercase" });
   const valueEl = labelEl.nextElementSibling;
   if (!valueEl) throw new Error(`No value node for ${label}`);
   return valueEl;

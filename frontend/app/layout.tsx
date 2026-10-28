@@ -1,5 +1,16 @@
 import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://dispatch.scottcampbell.io"),
@@ -57,10 +68,6 @@ const JSON_LD = {
 import { ThemeProvider } from "next-themes";
 import { DispatchProvider } from "./providers";
 import { Header } from "@/components/Header";
-import { SiteBar, ConsultFooter } from "@/components/SiteFrame";
-
-const CASE_STUDY = "https://scottcampbell.io/projects/dispatch-optimizer/";
-const REPO = "https://github.com/scottcampbelldata/field-service-dispatch-optimizer";
 
 export default function RootLayout({
   children,
@@ -71,17 +78,14 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className="h-full antialiased"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
-        <link rel="preload" href="/fonts/source-serif-4-text.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        <link rel="preload" href="/fonts/libertinus-serif-display-latin.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }} />
       </head>
       <body className="min-h-full flex flex-col">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <DispatchProvider>
-            <SiteBar caseStudy={CASE_STUDY} repo={REPO} />
             <Header />
             <main className="flex-1">{children}</main>
             <footer className="border-t mt-8" style={{ borderColor: "var(--border)" }}>
@@ -96,7 +100,6 @@ export default function RootLayout({
                 </span>
               </div>
             </footer>
-            <ConsultFooter caseStudy={CASE_STUDY} />
           </DispatchProvider>
         </ThemeProvider>
       </body>
